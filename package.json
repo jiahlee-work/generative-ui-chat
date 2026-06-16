@@ -7,7 +7,9 @@
     "dev": "pnpm generate:prompt && next dev",
     "build": "pnpm generate:prompt && next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
     "test": "vitest",
     "test:run": "vitest run --passWithNoTests",
     "prepare": "husky"
@@ -22,6 +24,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.0",
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
     "@openuidev/cli": "^0.0.7",
