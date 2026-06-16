@@ -1,9 +1,9 @@
 "use client";
 
 import type { UserMessage } from "@openuidev/react-headless";
-import { getDisplayText } from "../lib/display-text";
-import { getImagePartSource } from "../lib/image-message-content";
-import { ImagePreviewThumbnail } from "./image-preview-thumbnail";
+import { ImagePreviewThumbnail } from "@/presentation/chat/components/image-preview-thumbnail";
+import { getImagePartSource } from "@/presentation/chat/lib/image/image-message-content";
+import { getDisplayText } from "@/presentation/chat/lib/message/display-text";
 
 type ImageUserMessageProps = {
   message: UserMessage;

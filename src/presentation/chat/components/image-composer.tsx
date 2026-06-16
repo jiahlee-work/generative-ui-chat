@@ -25,13 +25,13 @@ import {
 import {
   getAttachmentStatusMessage,
   getChatErrorMessage,
-} from "../lib/image-composer-status";
+} from "@/presentation/chat/lib/composer/image-composer-status";
 import {
   imageComposerReducer,
   initialImageComposerState,
-} from "../lib/image-composer-state";
-import { getHasMultilineInput } from "../lib/image-composer-layout";
-import { ImagePreviewThumbnail } from "./image-preview-thumbnail";
+} from "@/presentation/chat/lib/composer/image-composer-state";
+import { ImagePreviewThumbnail } from "@/presentation/chat/components/image-preview-thumbnail";
+import { getHasMultilineInput } from "@/presentation/chat/lib/composer/image-composer-layout";
 
 type ImageComposerProps = {
   onSend: (message: string) => void;

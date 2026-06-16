@@ -1,5 +1,8 @@
 import type { BrowserImageAttachment } from "@/infrastructure/browser/image-files";
-import type { AttachmentStatus, ChatNotice } from "./image-composer-status";
+import type {
+  AttachmentStatus,
+  ChatNotice,
+} from "@/presentation/chat/lib/composer/image-composer-status";
 
 export type ImageComposerState = {
   textContent: string;

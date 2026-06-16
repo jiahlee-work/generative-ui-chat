@@ -14,9 +14,9 @@ import {
   prepareMessagesForChatRequest,
   updateLocalThread,
 } from "@/application/chat/chat-history";
-import { ImageComposer } from "./components/image-composer";
-import { ImageUserMessage } from "./components/image-user-message";
-import { getChatResponseErrorMessage } from "./lib/chat-response-error";
+import { ImageComposer } from "@/presentation/chat/components/image-composer";
+import { ImageUserMessage } from "@/presentation/chat/components/image-user-message";
+import { getChatResponseErrorMessage } from "@/presentation/chat/lib/response/chat-response-error";
 
 export function ChatScreen() {
   return (
