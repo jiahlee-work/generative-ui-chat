@@ -3,7 +3,7 @@ import type { InputContent, Message } from "@openuidev/react-headless";
 import {
   createThreadTitle,
   prepareMessagesForChatRequest,
-} from "@/application/chat/chat-history";
+} from "@/application/services/chat/chat-history";
 
 describe("채팅 요청 메시지 변환", () => {
   it("최신 사용자 메시지의 새 이미지 데이터만 요청에 포함한다", () => {

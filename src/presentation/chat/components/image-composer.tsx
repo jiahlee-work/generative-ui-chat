@@ -15,7 +15,7 @@ import {
   useThreadList,
 } from "@openuidev/react-headless";
 import { ArrowUp, ImagePlus, Square, X } from "lucide-react";
-import { saveLocalThreadMessages } from "@/application/chat/chat-history";
+import { saveLocalThreadMessages } from "@/application/services/chat/chat-history";
 import {
   allowedImageTypes,
   maxImageCount,
@@ -38,6 +38,10 @@ type ImageComposerProps = {
   onCancel: () => void;
   isRunning: boolean;
   isLoadingMessages: boolean;
+};
+
+type ImageInputContentPart = BinaryInputContent & {
+  attachmentId: string;
 };
 
 export function ImageComposer(props: ImageComposerProps) {
@@ -183,7 +187,8 @@ export function ImageComposer(props: ImageComposerProps) {
           mimeType: attachment.mimeType,
           url: attachment.dataUrl,
           filename: attachment.name,
-        } satisfies BinaryInputContent;
+          attachmentId: attachment.id,
+        } satisfies ImageInputContentPart;
       }),
     ];
 

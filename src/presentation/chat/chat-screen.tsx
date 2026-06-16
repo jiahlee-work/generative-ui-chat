@@ -1,58 +1,49 @@
 "use client";
 
 import {
-  openAIMessageFormat,
+  ChatProvider,
   openAIReadableStreamAdapter,
 } from "@openuidev/react-headless";
-import { FullScreen } from "@openuidev/react-ui";
-import { openuiLibrary } from "@openuidev/react-ui/genui-lib";
+import { Shell, ThemeProvider } from "@openuidev/react-ui";
 import {
   createLocalThread,
   deleteLocalThread,
   fetchLocalThreads,
   loadLocalThread,
-  prepareMessagesForChatRequest,
   updateLocalThread,
-} from "@/application/chat/chat-history";
-import { ImageComposer } from "@/presentation/chat/components/image-composer";
-import { ImageUserMessage } from "@/presentation/chat/components/image-user-message";
-import { OpenUITextLocalizer } from "@/presentation/chat/effects/openui-text-localizer";
-import { getChatResponseErrorMessage } from "@/presentation/chat/lib/response/chat-response-error";
+} from "@/application/services/chat/chat-history";
+import { processChatMessage } from "@/application/services/chat/process-chat-message";
+import { ChatComposer } from "@/presentation/chat/components/chat-composer";
+import { ChatMessages } from "@/presentation/chat/components/chat-messages";
+import { ChatMobileHeader } from "@/presentation/chat/components/chat-mobile-header";
+import { ChatSidebar } from "@/presentation/chat/components/chat-sidebar";
 
 export function ChatScreen() {
   return (
-    <>
-      <OpenUITextLocalizer />
-      <FullScreen
-        agentName="OpenUI Chat"
-        componentLibrary={openuiLibrary}
-        composer={ImageComposer}
+    <ThemeProvider>
+      <ChatProvider
         createThread={createLocalThread}
         deleteThread={deleteLocalThread}
         fetchThreadList={fetchLocalThreads}
         loadThread={loadLocalThread}
-        processMessage={async ({ messages, abortController }) => {
-          const response = await fetch("/api/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              messages: openAIMessageFormat.toApi(
-                prepareMessagesForChatRequest(messages),
-              ),
-            }),
-            signal: abortController.signal,
-          });
-
-          if (!response.ok) {
-            throw new Error(await getChatResponseErrorMessage(response));
-          }
-
-          return response;
-        }}
+        processMessage={processChatMessage}
         streamProtocol={openAIReadableStreamAdapter()}
         updateThread={updateLocalThread}
-        userMessage={ImageUserMessage}
-      />
-    </>
+      >
+        <Shell.Container
+          agentName="OpenUI Chat"
+          logoUrl="https://www.openui.com/favicon.svg"
+        >
+          <ChatSidebar />
+          <Shell.ThreadContainer>
+            <ChatMobileHeader />
+            <Shell.ScrollArea scrollVariant="user-message-anchor">
+              <ChatMessages />
+            </Shell.ScrollArea>
+            <ChatComposer />
+          </Shell.ThreadContainer>
+        </Shell.Container>
+      </ChatProvider>
+    </ThemeProvider>
   );
 }

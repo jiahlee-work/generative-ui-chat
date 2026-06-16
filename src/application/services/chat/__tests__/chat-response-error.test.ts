@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getChatResponseErrorMessage } from "@/presentation/chat/lib/response/chat-response-error";
+import { getChatResponseErrorMessage } from "@/application/services/chat/chat-response-error";
 
 describe("채팅 응답 에러 메시지", () => {
   it("구조화된 에러 응답의 사용자 메시지를 사용한다", async () => {
