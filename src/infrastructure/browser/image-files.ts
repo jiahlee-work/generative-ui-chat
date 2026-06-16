@@ -20,7 +20,7 @@ export function readImageFile(file: File): Promise<BrowserImageAttachment> {
 
     reader.onload = () => {
       if (typeof reader.result !== "string") {
-        reject(new Error("Failed to read image."));
+        reject(new Error("이미지를 읽지 못했습니다."));
         return;
       }
 
@@ -32,7 +32,7 @@ export function readImageFile(file: File): Promise<BrowserImageAttachment> {
         size: file.size,
       });
     };
-    reader.onerror = () => reject(new Error("Failed to read image."));
+    reader.onerror = () => reject(new Error("이미지를 읽지 못했습니다."));
     reader.readAsDataURL(file);
   });
 }

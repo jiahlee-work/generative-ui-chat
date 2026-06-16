@@ -136,7 +136,7 @@ export function createThreadTitle(firstMessage: UserMessage) {
     return text.length > 48 ? `${text.slice(0, 48)}...` : text;
   }
 
-  return "Image chat";
+  return "이미지 채팅";
 }
 
 function createThreadTitleFromMessages(messages: Message[]) {
@@ -145,7 +145,7 @@ function createThreadTitleFromMessages(messages: Message[]) {
   );
 
   if (!firstUserMessage) {
-    return "New chat";
+    return "새 채팅";
   }
 
   return createThreadTitle(firstUserMessage);
@@ -364,14 +364,14 @@ function prepareInputContentForRequest(
     return [
       {
         type: "text",
-        text: `[Image kept in local history: ${part.filename ?? "attachment"}]`,
+        text: `[로컬 히스토리에 보관된 이미지: ${part.filename ?? "첨부 파일"}]`,
       },
     ];
   });
 }
 
 function getUnavailableImageText(filename?: string) {
-  return `[Image unavailable: ${filename ?? "attachment"}]`;
+  return `[이미지를 불러올 수 없습니다: ${filename ?? "첨부 파일"}]`;
 }
 
 function findLatestUserMessageId(messages: Message[]) {

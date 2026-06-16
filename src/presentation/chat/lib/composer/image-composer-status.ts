@@ -7,20 +7,16 @@ export function getAttachmentStatusMessage(
   errorMessage: string | null,
 ) {
   if (status === "uploading") {
-    return "Uploading images...";
+    return "이미지를 업로드하는 중입니다.";
   }
 
   if (status === "ready" && attachmentCount > 0) {
-    return `${attachmentCount} image${attachmentCount === 1 ? "" : "s"} ready.`;
+    return `${attachmentCount}개의 이미지가 준비됐습니다.`;
   }
 
   if (status === "failed") {
-    return errorMessage ?? "Image upload failed.";
+    return errorMessage ?? "이미지 업로드에 실패했습니다.";
   }
 
   return null;
-}
-
-export function getChatErrorMessage(error: Error) {
-  return `LLM response failed: ${error.message}`;
 }

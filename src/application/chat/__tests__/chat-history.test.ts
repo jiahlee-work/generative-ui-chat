@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { InputContent, Message } from "@openuidev/react-headless";
-import { prepareMessagesForChatRequest } from "@/application/chat/chat-history";
+import {
+  createThreadTitle,
+  prepareMessagesForChatRequest,
+} from "@/application/chat/chat-history";
 
 describe("채팅 요청 메시지 변환", () => {
   it("최신 사용자 메시지의 새 이미지 데이터만 요청에 포함한다", () => {
@@ -40,7 +43,7 @@ describe("채팅 요청 메시지 변환", () => {
       { type: "text", text: "older image" },
       {
         type: "text",
-        text: "[Image kept in local history: older.png]",
+        text: "[로컬 히스토리에 보관된 이미지: older.png]",
       },
     ]);
     expect(getContent(latestMessage)).toEqual(messages[1].content);
@@ -69,9 +72,28 @@ describe("채팅 요청 메시지 변환", () => {
       { type: "text", text: "restored image" },
       {
         type: "text",
-        text: "[Image kept in local history: restored.png]",
+        text: "[로컬 히스토리에 보관된 이미지: restored.png]",
       },
     ]);
+  });
+});
+
+describe("채팅 제목 생성", () => {
+  it("텍스트가 없는 이미지 메시지는 한글 기본 제목을 사용한다", () => {
+    expect(
+      createThreadTitle({
+        id: "image-only",
+        role: "user",
+        content: [
+          {
+            type: "binary",
+            mimeType: "image/png",
+            filename: "image.png",
+            url: "data:image/png;base64,image",
+          },
+        ],
+      }),
+    ).toBe("이미지 채팅");
   });
 });
 

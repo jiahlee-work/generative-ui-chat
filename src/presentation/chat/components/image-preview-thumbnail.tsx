@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
+import { cn } from "@/shared/cn";
 
 type ImagePreviewThumbnailProps = {
   alt: string;
@@ -21,7 +22,7 @@ export function ImagePreviewThumbnail(props: ImagePreviewThumbnailProps) {
       role="dialog"
     >
       <button
-        aria-label="Close image preview"
+        aria-label="이미지 미리보기 닫기"
         className="image-preview-dialog__close"
         onClick={() => setIsPreviewOpen(false)}
         type="button"
@@ -42,8 +43,8 @@ export function ImagePreviewThumbnail(props: ImagePreviewThumbnailProps) {
   return (
     <>
       <button
-        aria-label={alt ? `Preview ${alt}` : "Preview image"}
-        className={`${className} image-preview-thumbnail`}
+        aria-label={alt ? `${alt} 미리보기` : "이미지 미리보기"}
+        className={cn(className, "image-preview-thumbnail")}
         onClick={() => setIsPreviewOpen(true)}
         type="button"
       >

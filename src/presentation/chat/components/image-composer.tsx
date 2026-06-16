@@ -22,9 +22,9 @@ import {
   maxImageSize,
   readImageFile,
 } from "@/infrastructure/browser/image-files";
+import { cn } from "@/shared/cn";
 import {
   getAttachmentStatusMessage,
-  getChatErrorMessage,
 } from "@/presentation/chat/lib/composer/image-composer-status";
 import {
   imageComposerReducer,
@@ -44,7 +44,6 @@ export function ImageComposer(props: ImageComposerProps) {
   const { onCancel, isRunning, isLoadingMessages } = props;
   const processMessage = useThread((state) => state.processMessage);
   const messages = useThread((state) => state.messages);
-  const threadError = useThread((state) => state.threadError);
   const selectedThreadId = useThreadList((state) => state.selectedThreadId);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -60,14 +59,10 @@ export function ImageComposer(props: ImageComposerProps) {
     chatNotice,
     hasMultilineInput,
   } = composerState;
-  const inputRowClassName = hasMultilineInput
-    ? "image-composer__input-row image-composer__input-row--multiline"
-    : "image-composer__input-row";
   const hasTextContent = textContent.trim().length > 0;
   const hasAttachments = attachments.length > 0;
   const isDisabled = isRunning || isLoadingMessages;
   const canSubmit = !isDisabled && (hasTextContent || hasAttachments);
-  const chatErrorMessage = threadError ? getChatErrorMessage(threadError) : null;
   const attachmentStatusMessage = getAttachmentStatusMessage(
     attachmentStatus,
     attachments.length,
@@ -130,7 +125,7 @@ export function ImageComposer(props: ImageComposerProps) {
     if (availableSlots <= 0) {
       dispatch({
         type: "imageSelectionFailed",
-        message: `You can attach up to ${maxImageCount} images.`,
+        message: `이미지는 최대 ${maxImageCount}개까지 첨부할 수 있습니다.`,
       });
       return;
     }
@@ -138,17 +133,17 @@ export function ImageComposer(props: ImageComposerProps) {
     let selectionErrorMessage: string | null = null;
 
     if (selectedFiles.length > availableSlots) {
-      selectionErrorMessage = `Only ${maxImageCount} images can be attached.`;
+      selectionErrorMessage = `이미지는 최대 ${maxImageCount}개까지 첨부할 수 있습니다.`;
     } else if (invalidFiles.length > 0) {
-      selectionErrorMessage = "Use JPG, PNG, or WebP images.";
+      selectionErrorMessage = "JPG, PNG, WebP 이미지만 사용할 수 있습니다.";
     } else if (oversizedFiles.length > 0) {
-      selectionErrorMessage = "Each image must be 4 MB or smaller.";
+      selectionErrorMessage = "이미지는 각각 4MB 이하여야 합니다.";
     }
 
     if (validFiles.length === 0) {
       dispatch({
         type: "imageSelectionFailed",
-        message: selectionErrorMessage ?? "Image upload failed.",
+        message: selectionErrorMessage ?? "이미지 업로드에 실패했습니다.",
       });
       return;
     }
@@ -163,7 +158,7 @@ export function ImageComposer(props: ImageComposerProps) {
     } catch {
       dispatch({
         type: "imageSelectionFailed",
-        message: "Failed to read one of the selected images.",
+        message: "선택한 이미지 중 일부를 읽지 못했습니다.",
       });
     }
   };
@@ -179,7 +174,7 @@ export function ImageComposer(props: ImageComposerProps) {
 
     const promptText = hasTextContent
       ? textContent.trim()
-      : "Describe the attached image.";
+      : "첨부한 이미지를 설명해 주세요.";
     const content: InputContent[] = [
       { type: "text", text: promptText },
       ...attachments.map((attachment) => {
@@ -242,11 +237,11 @@ export function ImageComposer(props: ImageComposerProps) {
                   src={attachment.dataUrl}
                 />
                 <button
-                  aria-label={`Remove ${attachment.name}`}
+                  aria-label={`${attachment.name} 제거`}
                   className="image-composer__attachment-remove"
                   disabled={isDisabled}
                   onClick={() => handleRemoveImage(attachment.id)}
-                  title="Remove image"
+                  title="이미지 제거"
                   type="button"
                 >
                   <X size={16} />
@@ -255,7 +250,12 @@ export function ImageComposer(props: ImageComposerProps) {
             ))}
           </div>
         )}
-        <div className={inputRowClassName}>
+        <div
+          className={cn(
+            "image-composer__input-row",
+            hasMultilineInput && "image-composer__input-row--multiline",
+          )}
+        >
           <input
             accept="image/jpeg,image/png,image/webp"
             className="image-composer__file-input"
@@ -268,11 +268,11 @@ export function ImageComposer(props: ImageComposerProps) {
             type="file"
           />
           <button
-            aria-label="Attach image"
+            aria-label="이미지 첨부"
             className="image-composer__icon-button"
             disabled={isDisabled || attachments.length >= maxImageCount}
             onClick={() => fileInputRef.current?.click()}
-            title="Attach image"
+            title="이미지 첨부"
             type="button"
           >
             <ImagePlus size={18} />
@@ -287,17 +287,17 @@ export function ImageComposer(props: ImageComposerProps) {
               })
             }
             onKeyDown={handleKeyDown}
-            placeholder="Type your message..."
+            placeholder="메시지를 입력하세요..."
             ref={textareaRef}
             rows={1}
             value={textContent}
           />
           <button
-            aria-label={isRunning ? "Cancel message" : "Send message"}
+            aria-label={isRunning ? "응답 중단" : "메시지 전송"}
             className="image-composer__send-button"
             disabled={!canSubmit && !isRunning}
             onClick={isRunning ? handleCancel : handleSubmit}
-            title={isRunning ? "Cancel message" : "Send message"}
+            title={isRunning ? "응답 중단" : "메시지 전송"}
             type="button"
           >
             {isRunning ? (
@@ -311,11 +311,11 @@ export function ImageComposer(props: ImageComposerProps) {
 
       {attachmentStatusMessage && (
         <p
-          className={
+          className={cn(
             attachmentStatus === "failed"
               ? "image-composer__error"
-              : "image-composer__status"
-          }
+              : "image-composer__status",
+          )}
           role="status"
         >
           {attachmentStatusMessage}
@@ -323,17 +323,12 @@ export function ImageComposer(props: ImageComposerProps) {
       )}
       {isRunning && (
         <p className="image-composer__status" role="status">
-          Streaming response...
+          응답을 생성하는 중입니다.
         </p>
       )}
       {!isRunning && chatNotice === "cancelled" && (
         <p className="image-composer__status" role="status">
-          Response cancelled.
-        </p>
-      )}
-      {chatErrorMessage && (
-        <p className="image-composer__error" role="status">
-          {chatErrorMessage}
+          응답 생성을 중단했습니다.
         </p>
       )}
     </form>

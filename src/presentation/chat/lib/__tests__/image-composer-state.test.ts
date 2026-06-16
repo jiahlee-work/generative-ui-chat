@@ -33,12 +33,14 @@ describe("이미지 입력창 상태 변경", () => {
     const state = imageComposerReducer(initialImageComposerState, {
       type: "imageSelectionSucceeded",
       attachments: [attachment],
-      errorMessage: "Only 3 images can be attached.",
+      errorMessage: "이미지는 최대 3개까지 첨부할 수 있습니다.",
     });
 
     expect(state.attachments).toEqual([attachment]);
     expect(state.attachmentStatus).toBe("failed");
-    expect(state.attachmentErrorMessage).toBe("Only 3 images can be attached.");
+    expect(state.attachmentErrorMessage).toBe(
+      "이미지는 최대 3개까지 첨부할 수 있습니다.",
+    );
   });
 
   it("전송 후 입력창 상태를 초기화한다", () => {
