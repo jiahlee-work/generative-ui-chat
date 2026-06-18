@@ -62,6 +62,22 @@ export async function readSelectedImageAttachments(
   }
 }
 
+export function getClipboardImageFiles(items: DataTransferItemList) {
+  return Array.from(items).reduce<File[]>((imageFiles, item) => {
+    if (item.kind !== "file" || !item.type.startsWith("image/")) {
+      return imageFiles;
+    }
+
+    const file = item.getAsFile();
+
+    if (file) {
+      imageFiles.push(file);
+    }
+
+    return imageFiles;
+  }, []);
+}
+
 function getImageSelectionErrorMessage(params: {
   availableSlots: number;
   invalidFileCount: number;

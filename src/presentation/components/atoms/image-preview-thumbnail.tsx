@@ -1,50 +1,55 @@
 "use client";
 
-import { X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import {
+  ImagePreviewDialog,
+  type ImagePreviewItem,
+} from "@/presentation/components/atoms/image-preview-dialog";
 import { cn } from "@/shared/cn";
+
+export type { ImagePreviewItem };
 
 type ImagePreviewThumbnailProps = {
   alt: string;
   src: string;
   className: string;
+  initialIndex?: number;
+  items?: ImagePreviewItem[];
 };
 
 export function ImagePreviewThumbnail(props: ImagePreviewThumbnailProps) {
-  const { alt, src, className } = props;
+  const { alt, src, className, initialIndex = 0, items } = props;
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const previewDialog = (
-    <div
-      aria-modal="true"
-      className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/70 p-6"
-      onClick={() => setIsPreviewOpen(false)}
-      role="dialog"
-    >
-      <button
-        aria-label="이미지 미리보기 닫기"
-        className="fixed top-5 right-5 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-0 bg-black/70 text-white"
-        onClick={() => setIsPreviewOpen(false)}
-        type="button"
-      >
-        <X size={20} />
-      </button>
-      <div
-        className="relative h-[min(calc(100vh-48px),760px)] w-[min(100%,1040px)]"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <Image
-          alt={alt}
-          className="rounded-xl object-contain"
-          fill
-          sizes="100vw"
-          src={src}
-          unoptimized
-        />
-      </div>
-    </div>
-  );
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const previewItems = items && items.length > 0 ? items : [{ alt, src }];
+  const currentItem = previewItems[currentIndex] ?? previewItems[0];
+
+  const getAdjacentIndex = (direction: "next" | "previous") => {
+    if (previewItems.length <= 0) {
+      return 0;
+    }
+
+    if (direction === "previous") {
+      return (currentIndex - 1 + previewItems.length) % previewItems.length;
+    }
+
+    return (currentIndex + 1) % previewItems.length;
+  };
+
+  const openPreview = () => {
+    setCurrentIndex(initialIndex);
+    setIsPreviewOpen(true);
+  };
+
+  const showPreviousImage = () => {
+    setCurrentIndex(getAdjacentIndex("previous"));
+  };
+
+  const showNextImage = () => {
+    setCurrentIndex(getAdjacentIndex("next"));
+  };
 
   return (
     <>
@@ -54,7 +59,7 @@ export function ImagePreviewThumbnail(props: ImagePreviewThumbnailProps) {
           className,
           "relative block cursor-zoom-in overflow-hidden border-0 bg-transparent p-0",
         )}
-        onClick={() => setIsPreviewOpen(true)}
+        onClick={openPreview}
         type="button"
       >
         <Image
@@ -68,7 +73,17 @@ export function ImagePreviewThumbnail(props: ImagePreviewThumbnailProps) {
       </button>
       {isPreviewOpen &&
         typeof document !== "undefined" &&
-        createPortal(previewDialog, document.body)}
+        createPortal(
+          <ImagePreviewDialog
+            currentIndex={currentIndex}
+            currentItem={currentItem}
+            itemCount={previewItems.length}
+            onClose={() => setIsPreviewOpen(false)}
+            onShowNextImage={showNextImage}
+            onShowPreviousImage={showPreviousImage}
+          />,
+          document.body,
+        )}
     </>
   );
 }

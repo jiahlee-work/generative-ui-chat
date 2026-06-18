@@ -2,7 +2,10 @@
 
 import { X } from "lucide-react";
 import type { BrowserImageAttachment } from "@/infrastructure/browser/image-files";
-import { ImagePreviewThumbnail } from "@/presentation/components/atoms/image-preview-thumbnail";
+import {
+  type ImagePreviewItem,
+  ImagePreviewThumbnail,
+} from "@/presentation/components/atoms/image-preview-thumbnail";
 
 type ImageComposerAttachmentsProps = {
   attachments: BrowserImageAttachment[];
@@ -12,10 +15,16 @@ type ImageComposerAttachmentsProps = {
 
 export function ImageComposerAttachments(props: ImageComposerAttachmentsProps) {
   const { attachments, isDisabled, onRemoveImage } = props;
+  const previewItems: ImagePreviewItem[] = attachments.map((attachment) => {
+    return {
+      alt: attachment.name,
+      src: attachment.dataUrl,
+    };
+  });
 
   return (
     <div className="flex w-full flex-wrap gap-2">
-      {attachments.map((attachment) => (
+      {attachments.map((attachment, index) => (
         <div
           className="relative h-[104px] w-[104px] max-sm:h-[88px] max-sm:w-[88px]"
           key={attachment.id}
@@ -23,6 +32,8 @@ export function ImageComposerAttachments(props: ImageComposerAttachmentsProps) {
           <ImagePreviewThumbnail
             alt={attachment.name}
             className="h-full w-full rounded-xl"
+            initialIndex={index}
+            items={previewItems}
             src={attachment.dataUrl}
           />
           <button

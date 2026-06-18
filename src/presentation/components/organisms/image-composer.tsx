@@ -3,6 +3,7 @@
 import { useThread, useThreadList } from "@openuidev/react-headless";
 import {
   type ChangeEvent,
+  type ClipboardEvent,
   type KeyboardEvent,
   useEffect,
   useLayoutEffect,
@@ -12,6 +13,7 @@ import {
 import { saveLocalThreadMessages } from "@/application/services/chat/chat-history";
 import { createImageInputContent } from "@/application/services/chat/image-composer-content";
 import {
+  getClipboardImageFiles,
   maxImageCount,
   readSelectedImageAttachments,
 } from "@/application/services/chat/image-composer-selection";
@@ -81,17 +83,14 @@ export function ImageComposer(props: ImageComposerProps) {
     textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
   });
 
-  const handleSelectImages = async (event: ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(event.target.files ?? []);
-    event.target.value = "";
-
-    if (selectedFiles.length === 0) {
+  const addImageFiles = async (imageFiles: File[]) => {
+    if (imageFiles.length === 0) {
       return;
     }
 
     dispatch({ type: "imageSelectionStarted" });
 
-    const result = await readSelectedImageAttachments(selectedFiles, attachments.length);
+    const result = await readSelectedImageAttachments(imageFiles, attachments.length);
 
     if (result.status === "succeeded") {
       dispatch({
@@ -106,6 +105,24 @@ export function ImageComposer(props: ImageComposerProps) {
       type: "imageSelectionFailed",
       message: result.message,
     });
+  };
+
+  const handleSelectImages = async (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files ?? []);
+    event.target.value = "";
+
+    await addImageFiles(selectedFiles);
+  };
+
+  const handlePaste = async (event: ClipboardEvent<HTMLTextAreaElement>) => {
+    const pastedImageFiles = getClipboardImageFiles(event.clipboardData.items);
+
+    if (pastedImageFiles.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+    await addImageFiles(pastedImageFiles);
   };
 
   const handleRemoveImage = (attachmentId: string) => {
@@ -178,6 +195,7 @@ export function ImageComposer(props: ImageComposerProps) {
           onCancel={handleCancel}
           onChangeText={handleChangeText}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           onSelectImages={handleSelectImages}
           onSubmit={handleSubmit}
           textContent={textContent}

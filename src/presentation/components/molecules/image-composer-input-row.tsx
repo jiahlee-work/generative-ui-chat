@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowUp, ImagePlus, Square } from "lucide-react";
-import { type ChangeEvent, type KeyboardEvent, type RefObject } from "react";
+import { type ChangeEvent, type ClipboardEvent, type KeyboardEvent, type RefObject } from "react";
 import { cn } from "@/shared/cn";
 
 type ImageComposerInputRowProps = {
@@ -14,6 +14,7 @@ type ImageComposerInputRowProps = {
   onCancel: () => void;
   onChangeText: (textContent: string) => void;
   onKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
+  onPaste: (event: ClipboardEvent<HTMLTextAreaElement>) => void;
   onSelectImages: (event: ChangeEvent<HTMLInputElement>) => void;
   onSubmit: () => void;
   textContent: string;
@@ -31,6 +32,7 @@ export function ImageComposerInputRow(props: ImageComposerInputRowProps) {
     onCancel,
     onChangeText,
     onKeyDown,
+    onPaste,
     onSelectImages,
     onSubmit,
     textContent,
@@ -76,6 +78,7 @@ export function ImageComposerInputRow(props: ImageComposerInputRowProps) {
         disabled={isDisabled}
         onChange={(event) => onChangeText(event.target.value)}
         onKeyDown={onKeyDown}
+        onPaste={onPaste}
         placeholder="메시지를 입력하세요..."
         ref={textareaRef}
         rows={1}
