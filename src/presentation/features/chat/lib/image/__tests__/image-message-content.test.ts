@@ -4,8 +4,8 @@ import {
   getImagePartSource,
 } from "@/presentation/features/chat/lib/image/image-message-content";
 
-describe("image message content helpers", () => {
-  it("uses the part URL as the image source when it exists", () => {
+describe("이미지 메시지 콘텐츠 도우미", () => {
+  it("이미지 조각 URL이 있으면 이미지 출처로 사용한다", () => {
     expect(
       getImagePartSource({
         type: "binary",
@@ -15,7 +15,7 @@ describe("image message content helpers", () => {
     ).toBe("blob:http://localhost/image");
   });
 
-  it("builds a data URL from base64 image data", () => {
+  it("base64 이미지 데이터에서 데이터 URL을 만든다", () => {
     expect(
       getImagePartSource({
         type: "binary",
@@ -25,7 +25,7 @@ describe("image message content helpers", () => {
     ).toBe("data:image/png;base64,abc");
   });
 
-  it("prefers attachment IDs for stable image keys", () => {
+  it("안정적인 이미지 키로 첨부 ID를 우선 사용한다", () => {
     expect(
       getImagePartKey({
         type: "binary",
@@ -37,7 +37,7 @@ describe("image message content helpers", () => {
     ).toBe("attachment-1");
   });
 
-  it("falls back to URL or image content for image keys", () => {
+  it("이미지 키가 없으면 URL 또는 이미지 콘텐츠로 대체한다", () => {
     expect(
       getImagePartKey({
         type: "binary",

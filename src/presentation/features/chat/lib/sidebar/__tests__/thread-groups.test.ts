@@ -2,8 +2,8 @@ import type { Thread } from "@openuidev/react-headless";
 import { describe, expect, it } from "vitest";
 import { groupThreadsByCreatedAt } from "@/presentation/features/chat/lib/sidebar/thread-groups";
 
-describe("thread groups", () => {
-  it("groups threads by created date recency", () => {
+describe("스레드 그룹", () => {
+  it("생성일 기준 최근성에 따라 스레드를 그룹화한다", () => {
     const groups = groupThreadsByCreatedAt(
       [
         thread("today", "2026-06-16T03:00:00.000Z"),

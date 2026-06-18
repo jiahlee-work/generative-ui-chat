@@ -6,8 +6,8 @@ import {
   getIsStreamingAssistantMessage,
 } from "@/application/services/chat/genui-assistant-message";
 
-describe("GenUI assistant message helpers", () => {
-  it("detects whether the assistant message is currently streaming", () => {
+describe("GenUI 어시스턴트 메시지 도우미", () => {
+  it("어시스턴트 메시지가 현재 스트리밍 중인지 판별한다", () => {
     const messages: Message[] = [
       { id: "user-1", role: "user", content: "hi" },
       { id: "assistant-1", role: "assistant", content: "" },
@@ -19,14 +19,14 @@ describe("GenUI assistant message helpers", () => {
     expect(getIsStreamingAssistantMessage(messages, false, "assistant-2")).toBe(false);
   });
 
-  it("parses renderer state from OpenUI context", () => {
+  it("OpenUI 문맥에서 렌더러 상태를 파싱한다", () => {
     expect(getInitialRendererState('[{"count":1}]')).toEqual({ count: 1 });
     expect(getInitialRendererState('{"count":1}')).toEqual({ count: 1 });
     expect(getInitialRendererState("not-json")).toBeUndefined();
     expect(getInitialRendererState(null)).toBeUndefined();
   });
 
-  it("returns tool messages immediately following an assistant message", () => {
+  it("어시스턴트 메시지 바로 뒤에 이어지는 도구 메시지를 반환한다", () => {
     const messages: Message[] = [
       { id: "assistant-1", role: "assistant", content: "" },
       { id: "tool-1", role: "tool", content: "a", toolCallId: "call-1" },
