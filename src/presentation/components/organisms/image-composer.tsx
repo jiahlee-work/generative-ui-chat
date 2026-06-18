@@ -1,6 +1,6 @@
 "use client";
 
-import { useThread, useThreadList } from "@openuidev/react-headless";
+import { type AssistantMessage, useThread, useThreadList } from "@openuidev/react-headless";
 import {
   type ChangeEvent,
   type ClipboardEvent,
@@ -17,6 +17,7 @@ import {
   maxImageCount,
   readSelectedImageAttachments,
 } from "@/application/services/chat/image-composer-selection";
+import { markOpenUIResponseInterrupted } from "@/application/services/chat/openui-content";
 import { ImageComposerAttachments } from "@/presentation/components/molecules/image-composer-attachments";
 import { ImageComposerInputRow } from "@/presentation/components/molecules/image-composer-input-row";
 import { ImageComposerStatus } from "@/presentation/components/molecules/image-composer-status";
@@ -37,6 +38,7 @@ export function ImageComposer(props: ImageComposerProps) {
   const { onCancel, isRunning, isLoadingMessages } = props;
   const processMessage = useThread((state) => state.processMessage);
   const messages = useThread((state) => state.messages);
+  const updateMessage = useThread((state) => state.updateMessage);
   const selectedThreadId = useThreadList((state) => state.selectedThreadId);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -59,29 +61,6 @@ export function ImageComposer(props: ImageComposerProps) {
     attachments.length,
     attachmentErrorMessage,
   );
-
-  useEffect(() => {
-    if (!selectedThreadId || isRunning) {
-      return;
-    }
-
-    void saveLocalThreadMessages(selectedThreadId, messages).catch(() => undefined);
-  }, [isRunning, messages, selectedThreadId]);
-
-  useLayoutEffect(() => {
-    const textarea = textareaRef.current;
-
-    if (!textarea) {
-      return;
-    }
-
-    textarea.style.height = "auto";
-    dispatch({
-      type: "inputLayoutChanged",
-      hasMultilineInput: getHasMultilineInput(textarea),
-    });
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
-  });
 
   const addImageFiles = async (imageFiles: File[]) => {
     if (imageFiles.length === 0) {
@@ -150,7 +129,30 @@ export function ImageComposer(props: ImageComposerProps) {
   };
 
   const handleCancel = () => {
+    let latestAssistantMessage: AssistantMessage | null = null;
+
+    for (let index = messages.length - 1; index >= 0; index -= 1) {
+      const candidateMessage = messages[index];
+
+      if (!candidateMessage || candidateMessage.role === "user") {
+        break;
+      }
+
+      if (candidateMessage.role === "assistant") {
+        latestAssistantMessage = candidateMessage;
+        break;
+      }
+    }
+
     onCancel();
+
+    if (latestAssistantMessage) {
+      updateMessage({
+        ...latestAssistantMessage,
+        content: markOpenUIResponseInterrupted(latestAssistantMessage.content ?? ""),
+      });
+    }
+
     dispatch({ type: "cancelled" });
   };
 
@@ -160,6 +162,29 @@ export function ImageComposer(props: ImageComposerProps) {
       handleSubmit();
     }
   };
+
+  useEffect(() => {
+    if (!selectedThreadId || isRunning) {
+      return;
+    }
+
+    void saveLocalThreadMessages(selectedThreadId, messages).catch(() => undefined);
+  }, [isRunning, messages, selectedThreadId]);
+
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = "auto";
+    dispatch({
+      type: "inputLayoutChanged",
+      hasMultilineInput: getHasMultilineInput(textarea),
+    });
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
+  });
 
   return (
     <form

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  markOpenUIResponseInterrupted,
   separateOpenUIContent,
   wrapOpenUIContent,
   wrapOpenUIContext,
@@ -10,6 +11,7 @@ describe("OpenUI 콘텐츠 도우미", () => {
     expect(separateOpenUIContent('Render code\n<context>{"value":1}</context>')).toEqual({
       content: "Render code",
       contextString: '{"value":1}',
+      responseStatus: null,
     });
   });
 
@@ -17,7 +19,26 @@ describe("OpenUI 콘텐츠 도우미", () => {
     expect(separateOpenUIContent("<content>사용자 입력</content>")).toEqual({
       content: "사용자 입력",
       contextString: null,
+      responseStatus: null,
     });
+  });
+
+  it("중단된 어시스턴트 응답 상태를 콘텐츠 렌더링에서 분리한다", () => {
+    const markedContent = markOpenUIResponseInterrupted(
+      'Render code\n<context>{"value":1}</context>',
+    );
+
+    expect(separateOpenUIContent(markedContent)).toEqual({
+      content: "Render code",
+      contextString: '{"value":1}',
+      responseStatus: "interrupted",
+    });
+  });
+
+  it("중단 상태 마커를 중복으로 추가하지 않는다", () => {
+    const markedContent = markOpenUIResponseInterrupted("Render code");
+
+    expect(markOpenUIResponseInterrupted(markedContent)).toBe(markedContent);
   });
 
   it("콘텐츠와 문맥 태그를 감싼다", () => {

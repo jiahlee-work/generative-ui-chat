@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { getChatResponseErrorMessage } from "@/application/services/chat/chat-response-error";
+import {
+  getChatResponseErrorDetail,
+  getChatResponseErrorMessage,
+} from "@/application/services/chat/chat-response-error";
 
 describe("채팅 응답 에러 메시지", () => {
   it("구조화된 에러 응답의 코드를 사용자 메시지로 바꾼다", async () => {
@@ -19,6 +22,36 @@ describe("채팅 응답 에러 메시지", () => {
     );
   });
 
+  it("구조화된 에러 응답의 재시도 가능 여부를 유지한다", async () => {
+    const missingApiKeyResponse = Response.json(
+      {
+        error: {
+          code: "missing_api_key",
+          retryable: false,
+        },
+      },
+      { status: 500 },
+    );
+    const rateLimitedResponse = Response.json(
+      {
+        error: {
+          code: "rate_limited",
+          retryable: true,
+        },
+      },
+      { status: 429 },
+    );
+
+    await expect(getChatResponseErrorDetail(missingApiKeyResponse)).resolves.toEqual({
+      message: "서비스 설정에 문제가 있습니다. 담당자에게 문의해 주세요.",
+      retryable: false,
+    });
+    await expect(getChatResponseErrorDetail(rateLimitedResponse)).resolves.toEqual({
+      message: "요청이 많아 잠시 응답할 수 없습니다. 나중에 재시도해 주세요.",
+      retryable: true,
+    });
+  });
+
   it("구조화된 에러 응답의 내부 메시지를 사용자에게 노출하지 않는다", async () => {
     const response = Response.json(
       {
@@ -32,7 +65,7 @@ describe("채팅 응답 에러 메시지", () => {
     );
 
     await expect(getChatResponseErrorMessage(response)).resolves.toBe(
-      "응답을 생성하지 못했습니다. 다시 시도해 주세요.",
+      "응답을 생성하지 못했습니다. 재시도해 주세요.",
     );
   });
 
@@ -48,7 +81,7 @@ describe("채팅 응답 에러 메시지", () => {
     );
 
     await expect(getChatResponseErrorMessage(response)).resolves.toBe(
-      "요청이 많아 잠시 응답할 수 없습니다. 나중에 다시 시도해 주세요.",
+      "요청이 많아 잠시 응답할 수 없습니다. 나중에 재시도해 주세요.",
     );
   });
 
@@ -65,7 +98,7 @@ describe("채팅 응답 에러 메시지", () => {
     );
 
     await expect(getChatResponseErrorMessage(response)).resolves.toBe(
-      "응답을 생성하지 못했습니다. 다시 시도해 주세요.",
+      "응답을 생성하지 못했습니다. 재시도해 주세요.",
     );
   });
 
@@ -82,7 +115,7 @@ describe("채팅 응답 에러 메시지", () => {
     );
 
     await expect(getChatResponseErrorMessage(response)).resolves.toBe(
-      "채팅 요청에 실패했습니다. 다시 시도해 주세요.",
+      "채팅 요청에 실패했습니다. 재시도해 주세요.",
     );
   });
 
@@ -101,7 +134,7 @@ describe("채팅 응답 에러 메시지", () => {
     const response = new Response(null, { status: 503 });
 
     await expect(getChatResponseErrorMessage(response)).resolves.toBe(
-      "일시적으로 응답할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+      "일시적으로 응답할 수 없습니다. 잠시 후 재시도해 주세요.",
     );
   });
 });

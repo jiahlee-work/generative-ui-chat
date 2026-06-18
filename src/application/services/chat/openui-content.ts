@@ -1,14 +1,29 @@
+export type OpenUIResponseStatus = "interrupted" | null;
+
+const interruptedResponseMarker = "<!-- openui-chat:response-status=interrupted -->";
+
+export function markOpenUIResponseInterrupted(raw: string) {
+  if (raw.includes(interruptedResponseMarker)) {
+    return raw;
+  }
+
+  return `${interruptedResponseMarker}\n${raw}`;
+}
+
 export function separateOpenUIContent(raw: string): {
   content: string;
   contextString: string | null;
+  responseStatus: OpenUIResponseStatus;
 } {
-  const contextMatch = raw.match(/<context>([\s\S]*)<\/context>\s*$/);
-  let content = raw;
+  const responseStatus = raw.includes(interruptedResponseMarker) ? "interrupted" : null;
+  const normalizedRaw = raw.replaceAll(interruptedResponseMarker, "").trimStart();
+  const contextMatch = normalizedRaw.match(/<context>([\s\S]*)<\/context>\s*$/);
+  let content = normalizedRaw;
   let contextString: string | null = null;
 
   if (contextMatch) {
     contextString = contextMatch[1] ?? null;
-    content = raw.slice(0, contextMatch.index).trimEnd();
+    content = normalizedRaw.slice(0, contextMatch.index).trimEnd();
   }
 
   const contentMatch = content.match(/^<content[^>]*>([\s\S]*)<\/content>\s*$/);
@@ -20,6 +35,7 @@ export function separateOpenUIContent(raw: string): {
   return {
     content,
     contextString,
+    responseStatus,
   };
 }
 

@@ -18,6 +18,30 @@ export function getIsStreamingAssistantMessage(
   return false;
 }
 
+export function getIsLatestAssistantResponseMessage(messages: Message[], messageId: string) {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+
+    if (!message) {
+      continue;
+    }
+
+    if (message.role === "tool") {
+      continue;
+    }
+
+    if (message.role === "assistant") {
+      return message.id === messageId;
+    }
+
+    if (message.role === "user") {
+      return false;
+    }
+  }
+
+  return false;
+}
+
 export function getInitialRendererState(contextString: string | null) {
   if (!contextString) {
     return undefined;

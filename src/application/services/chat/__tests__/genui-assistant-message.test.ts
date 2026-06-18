@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   getFollowingToolMessages,
   getInitialRendererState,
+  getIsLatestAssistantResponseMessage,
   getIsStreamingAssistantMessage,
 } from "@/application/services/chat/genui-assistant-message";
 
@@ -17,6 +18,30 @@ describe("GenUI 어시스턴트 메시지 도우미", () => {
     expect(getIsStreamingAssistantMessage(messages, true, "assistant-2")).toBe(true);
     expect(getIsStreamingAssistantMessage(messages, true, "assistant-1")).toBe(false);
     expect(getIsStreamingAssistantMessage(messages, false, "assistant-2")).toBe(false);
+  });
+
+  it("마지막 사용자 질문에 대한 최신 어시스턴트 응답인지 판별한다", () => {
+    const messages: Message[] = [
+      { id: "user-1", role: "user", content: "hi" },
+      { id: "assistant-1", role: "assistant", content: "" },
+      { id: "tool-1", role: "tool", content: "a", toolCallId: "call-1" },
+      { id: "user-2", role: "user", content: "again" },
+      { id: "assistant-2", role: "assistant", content: "" },
+      { id: "tool-2", role: "tool", content: "b", toolCallId: "call-2" },
+    ];
+
+    expect(getIsLatestAssistantResponseMessage(messages, "assistant-2")).toBe(true);
+    expect(getIsLatestAssistantResponseMessage(messages, "assistant-1")).toBe(false);
+  });
+
+  it("마지막 사용자 질문 뒤에 어시스턴트 응답이 없으면 최신 응답이 없다고 판단한다", () => {
+    const messages: Message[] = [
+      { id: "user-1", role: "user", content: "hi" },
+      { id: "assistant-1", role: "assistant", content: "" },
+      { id: "user-2", role: "user", content: "again" },
+    ];
+
+    expect(getIsLatestAssistantResponseMessage(messages, "assistant-1")).toBe(false);
   });
 
   it("OpenUI 문맥에서 렌더러 상태를 파싱한다", () => {
