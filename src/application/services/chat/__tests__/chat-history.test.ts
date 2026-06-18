@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import type { InputContent, Message } from "@openuidev/react-headless";
+import { describe, expect, it } from "vitest";
 import {
   createThreadTitle,
   prepareMessagesForChatRequest,
@@ -36,8 +36,7 @@ describe("채팅 요청 메시지 변환", () => {
       },
     ] satisfies Message[];
 
-    const [olderMessage, latestMessage] =
-      prepareMessagesForChatRequest(messages);
+    const [olderMessage, latestMessage] = prepareMessagesForChatRequest(messages);
 
     expect(getContent(olderMessage)).toEqual([
       { type: "text", text: "older image" },

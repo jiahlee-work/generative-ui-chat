@@ -1,24 +1,15 @@
 import { readFileSync } from "fs";
-import { join } from "path";
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { join } from "path";
 
-const systemPrompt = readFileSync(
-  join(process.cwd(), "src/generated/system-prompt.txt"),
-  "utf-8",
-);
+const systemPrompt = readFileSync(join(process.cwd(), "src/generated/system-prompt.txt"), "utf-8");
 
 const geminiBaseUrl = "https://generativelanguage.googleapis.com/v1beta/openai/";
-const allowedImageMimeTypes = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-]);
+const allowedImageMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const maxImageCount = 3;
 const maxImageBytes = 4 * 1024 * 1024;
-const serverSetupErrorMessage =
-  "서비스 설정에 문제가 있습니다. 담당자에게 문의해 주세요.";
 
 type ChatErrorCode =
   | "missing_api_key"
@@ -37,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     return createErrorResponse({
       code: "missing_api_key",
-      message: serverSetupErrorMessage,
+      message: "서비스 설정에 문제가 있습니다. 담당자에게 문의해 주세요.",
       retryable: false,
       status: 500,
     });
@@ -147,11 +138,8 @@ function getInternalErrorMessage(error: unknown) {
   return String(error);
 }
 
-function logChatError(error: {
-  code: ChatErrorCode;
-  message: string;
-  status: number;
-}) {
+function logChatError(error: { code: ChatErrorCode; message: string; status: number }) {
+  // biome-ignore lint/suspicious/noConsole: Server-side errors should be visible in local and platform logs.
   console.error("[chat:error]", error);
 }
 
@@ -175,9 +163,7 @@ function createErrorResponse(error: ErrorResponseDetail) {
   );
 }
 
-function validateMessages(
-  messages: unknown,
-): messages is ChatCompletionMessageParam[] {
+function validateMessages(messages: unknown): messages is ChatCompletionMessageParam[] {
   if (!Array.isArray(messages)) {
     return false;
   }

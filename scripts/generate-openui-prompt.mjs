@@ -1,8 +1,8 @@
 import { spawnSync } from "child_process";
 import { existsSync } from "fs";
-import { dirname, join, resolve } from "path";
 import { createRequire } from "module";
 import { tmpdir } from "os";
+import { dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
 
 const require = createRequire(import.meta.url);
@@ -17,14 +17,10 @@ if (!existsSync(cliPath)) {
   throw new Error(`OpenUI CLI not found at ${cliPath}`);
 }
 
-const result = spawnSync(
-  process.execPath,
-  [cliPath, "generate", entryPath, "--out", outPath],
-  {
-    cwd: tmpdir(),
-    stdio: "inherit",
-  },
-);
+const result = spawnSync(process.execPath, [cliPath, "generate", entryPath, "--out", outPath], {
+  cwd: tmpdir(),
+  stdio: "inherit",
+});
 
 if (result.error) {
   throw result.error;

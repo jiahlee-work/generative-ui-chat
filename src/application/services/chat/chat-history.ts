@@ -5,10 +5,7 @@ import type {
   Thread,
   UserMessage,
 } from "@openuidev/react-headless";
-import {
-  createBlobObjectUrl,
-  revokeBlobObjectUrls,
-} from "@/infrastructure/browser/image-files";
+import { createBlobObjectUrl, revokeBlobObjectUrls } from "@/infrastructure/browser/image-files";
 import {
   deleteStoredThread,
   getStoredAttachment,
@@ -16,11 +13,11 @@ import {
   getStoredThread,
   listStoredThreads,
   replaceStoredMessages,
-  saveStoredThread,
   type StoredAttachmentRecord,
   type StoredInputContentPart,
   type StoredMessageRecord,
   type StoredThreadRecord,
+  saveStoredThread,
 } from "@/infrastructure/storage/chat-history-db";
 
 type StoredBinaryInputContent = BinaryInputContent & {
@@ -77,10 +74,7 @@ export async function loadLocalThread(threadId: string) {
   return Promise.all(storedMessages.map(fromStoredMessage));
 }
 
-export async function saveLocalThreadMessages(
-  threadId: string,
-  messages: Message[],
-) {
+export async function saveLocalThreadMessages(threadId: string, messages: Message[]) {
   const existingThread = await getStoredThread(threadId);
 
   if (!existingThread) {
@@ -92,12 +86,7 @@ export async function saveLocalThreadMessages(
   const storedAttachments: StoredAttachmentRecord[] = [];
 
   for (const [order, message] of messages.entries()) {
-    const { storedMessage, attachments } = await toStoredMessage(
-      threadId,
-      message,
-      order,
-      now,
-    );
+    const { storedMessage, attachments } = await toStoredMessage(threadId, message, order, now);
 
     storedMessages.push(storedMessage);
     storedAttachments.push(...attachments);
@@ -121,10 +110,7 @@ export function prepareMessagesForChatRequest(messages: Message[]) {
 
     return {
       ...message,
-      content: prepareInputContentForRequest(
-        message.content,
-        message.id === latestUserMessageId,
-      ),
+      content: prepareInputContentForRequest(message.content, message.id === latestUserMessageId),
     };
   });
 }
@@ -196,12 +182,7 @@ async function getStoredMessageContent(
   attachments: StoredAttachmentRecord[],
 ) {
   if (message.role === "user" && Array.isArray(message.content)) {
-    return toStoredInputContent(
-      threadId,
-      message.id,
-      message.content,
-      attachments,
-    );
+    return toStoredInputContent(threadId, message.id, message.content, attachments);
   }
 
   return typeof message.content === "string" ? message.content : undefined;
@@ -274,9 +255,7 @@ async function getBlobFromBinaryPart(part: StoredBinaryInputContent) {
   return null;
 }
 
-async function fromStoredMessage(
-  message: StoredMessageRecord,
-): Promise<Message> {
+async function fromStoredMessage(message: StoredMessageRecord): Promise<Message> {
   if (Array.isArray(message.content)) {
     return {
       id: message.id,
@@ -290,9 +269,7 @@ async function fromStoredMessage(
       id: message.id,
       role: "assistant",
       content: message.content,
-      toolCalls: Array.isArray(message.toolCalls)
-        ? message.toolCalls
-        : undefined,
+      toolCalls: Array.isArray(message.toolCalls) ? message.toolCalls : undefined,
     };
   }
 
@@ -324,9 +301,7 @@ async function fromStoredInputContent(content: StoredInputContentPart[]) {
       continue;
     }
 
-    const attachment = await getStoredAttachment(part.attachmentId).catch(
-      () => undefined,
-    );
+    const attachment = await getStoredAttachment(part.attachmentId).catch(() => undefined);
 
     if (!attachment) {
       restoredParts.push({
@@ -348,10 +323,7 @@ async function fromStoredInputContent(content: StoredInputContentPart[]) {
   return restoredParts;
 }
 
-function prepareInputContentForRequest(
-  content: InputContent[],
-  isLatestUserMessage: boolean,
-) {
+function prepareInputContentForRequest(content: InputContent[], isLatestUserMessage: boolean) {
   return content.flatMap((part): InputContent[] => {
     if (part.type === "text") {
       return [part];

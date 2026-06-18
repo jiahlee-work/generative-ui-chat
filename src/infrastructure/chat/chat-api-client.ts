@@ -1,7 +1,4 @@
-import {
-  type Message,
-  openAIMessageFormat,
-} from "@openuidev/react-headless";
+import { type Message, openAIMessageFormat } from "@openuidev/react-headless";
 
 type PostChatMessagesParams = {
   messages: Message[];

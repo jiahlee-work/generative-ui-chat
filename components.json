@@ -13,11 +13,11 @@
   "iconLibrary": "lucide",
   "rtl": false,
   "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
+    "components": "@/presentation/components",
+    "utils": "@/shared/cn",
+    "ui": "@/presentation/components/atoms",
+    "lib": "@/shared",
+    "hooks": "@/presentation/hooks"
   },
   "menuColor": "default",
   "menuAccent": "subtle",

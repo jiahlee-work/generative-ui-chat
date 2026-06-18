@@ -1,6 +1,6 @@
 "use client";
 
-import { ChatScreen } from "@/presentation/chat/chat-screen";
+import { ChatScreen } from "@/presentation/features/chat/chat-screen";
 
 export default function Home() {
   return (

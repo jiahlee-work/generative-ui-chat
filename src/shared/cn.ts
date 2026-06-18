@@ -1,5 +1,6 @@
-type ClassNameValue = string | false | null | undefined;
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-export function cn(...classNames: ClassNameValue[]) {
-  return classNames.filter(Boolean).join(" ");
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }

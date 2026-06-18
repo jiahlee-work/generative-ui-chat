@@ -1,7 +1,7 @@
 import type { Message } from "@openuidev/react-headless";
-import { postChatMessages } from "@/infrastructure/chat/chat-api-client";
-import { getChatResponseErrorMessage } from "@/application/services/chat/chat-response-error";
 import { prepareMessagesForChatRequest } from "@/application/services/chat/chat-history";
+import { getChatResponseErrorMessage } from "@/application/services/chat/chat-response-error";
+import { postChatMessages } from "@/infrastructure/chat/chat-api-client";
 
 type ProcessChatMessageParams = {
   messages: Message[];

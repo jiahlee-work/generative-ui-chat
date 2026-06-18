@@ -29,8 +29,7 @@ export function isErrorResponseBody(
     typeof value === "object" &&
     value !== null &&
     "error" in value &&
-    (typeof value.error === "string" ||
-      (typeof value.error === "object" && value.error !== null))
+    (typeof value.error === "string" || (typeof value.error === "object" && value.error !== null))
   );
 }
 

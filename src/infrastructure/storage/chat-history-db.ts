@@ -28,9 +28,7 @@ export type StoredBinaryContentPart = {
   filename?: string;
 };
 
-export type StoredInputContentPart =
-  | StoredTextContentPart
-  | StoredBinaryContentPart;
+export type StoredInputContentPart = StoredTextContentPart | StoredBinaryContentPart;
 
 export type StoredMessageRecord = {
   id: string;
@@ -53,10 +51,7 @@ let databasePromise: Promise<IDBDatabase> | null = null;
 
 export async function listStoredThreads() {
   const database = await openDatabase();
-  const threads = await getAllRecords<StoredThreadRecord>(
-    database,
-    threadsStoreName,
-  );
+  const threads = await getAllRecords<StoredThreadRecord>(database, threadsStoreName);
 
   return threads.sort((a, b) => b.updatedAt - a.updatedAt);
 }
@@ -65,9 +60,7 @@ export async function getStoredThread(threadId: string) {
   const database = await openDatabase();
 
   return requestToPromise<StoredThreadRecord | undefined>(
-    database.transaction(threadsStoreName).objectStore(threadsStoreName).get(
-      threadId,
-    ),
+    database.transaction(threadsStoreName).objectStore(threadsStoreName).get(threadId),
   );
 }
 
@@ -97,10 +90,7 @@ export async function replaceStoredMessages(
   attachments: StoredAttachmentRecord[],
 ) {
   const database = await openDatabase();
-  const transaction = database.transaction(
-    [messagesStoreName, attachmentsStoreName],
-    "readwrite",
-  );
+  const transaction = database.transaction([messagesStoreName, attachmentsStoreName], "readwrite");
   const messageStore = transaction.objectStore(messagesStoreName);
   const attachmentStore = transaction.objectStore(attachmentsStoreName);
   const currentMessages = await requestToPromise<StoredMessageRecord[]>(
@@ -136,9 +126,7 @@ function getRetainedAttachmentIds(
   messages: StoredMessageRecord[],
   attachments: StoredAttachmentRecord[],
 ) {
-  const attachmentIds = new Set(
-    attachments.map((attachment) => attachment.id),
-  );
+  const attachmentIds = new Set(attachments.map((attachment) => attachment.id));
 
   for (const message of messages) {
     if (!Array.isArray(message.content)) {
@@ -159,10 +147,7 @@ export async function getStoredAttachment(attachmentId: string) {
   const database = await openDatabase();
 
   return requestToPromise<StoredAttachmentRecord | undefined>(
-    database
-      .transaction(attachmentsStoreName)
-      .objectStore(attachmentsStoreName)
-      .get(attachmentId),
+    database.transaction(attachmentsStoreName).objectStore(attachmentsStoreName).get(attachmentId),
   );
 }
 
@@ -215,10 +200,9 @@ function openDatabase() {
         }
 
         if (!database.objectStoreNames.contains(attachmentsStoreName)) {
-          const attachmentStore = database.createObjectStore(
-            attachmentsStoreName,
-            { keyPath: "id" },
-          );
+          const attachmentStore = database.createObjectStore(attachmentsStoreName, {
+            keyPath: "id",
+          });
           attachmentStore.createIndex("threadId", "threadId");
         }
       };
@@ -230,15 +214,10 @@ function openDatabase() {
   return databasePromise;
 }
 
-function getAllRecords<TRecord>(
-  database: IDBDatabase,
-  storeName: string,
-): Promise<TRecord[]> {
+function getAllRecords<TRecord>(database: IDBDatabase, storeName: string): Promise<TRecord[]> {
   const transaction = database.transaction(storeName);
 
-  return requestToPromise<TRecord[]>(
-    transaction.objectStore(storeName).getAll(),
-  );
+  return requestToPromise<TRecord[]>(transaction.objectStore(storeName).getAll());
 }
 
 function getAllFromIndex<TRecord>(

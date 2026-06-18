@@ -1,8 +1,4 @@
-export const allowedImageTypes = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-]);
+export const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 export const maxImageCount = 3;
 export const maxImageSize = 4 * 1024 * 1024;
 
