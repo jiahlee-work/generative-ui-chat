@@ -6,6 +6,7 @@ import type {
   UserMessage,
 } from "@openuidev/react-headless";
 import { isChatResponseError } from "@/application/services/chat/chat-response-error";
+import { getIsLatestAssistantResponseMessage } from "@/application/services/chat/genui-assistant-message";
 
 export type ChatRetryBlockReason = "noUserMessage" | "imageRequiresReattach";
 
@@ -27,8 +28,39 @@ export type ChatRetryControl = {
 
 type ChatRetryControlOptions = {
   isRetryTarget: boolean;
-  isRetryableError?: boolean;
+  error?: unknown;
 };
+
+type AssistantMessageRetryTargetOptions = {
+  assistantMessageId: string;
+  hasThreadError: boolean;
+  isRunning: boolean;
+  messages: Message[];
+};
+
+type UnansweredUserMessageRetryTargetOptions = {
+  hasThreadError: boolean;
+  isLatestUserMessageMissingResponse: boolean;
+  isRunning: boolean;
+};
+
+export function getIsAssistantMessageRetryTarget(options: AssistantMessageRetryTargetOptions) {
+  if (options.isRunning || options.hasThreadError) {
+    return false;
+  }
+
+  return getIsLatestAssistantResponseMessage(options.messages, options.assistantMessageId);
+}
+
+export function getIsUnansweredUserMessageRetryTarget(
+  options: UnansweredUserMessageRetryTargetOptions,
+) {
+  if (options.isRunning || options.hasThreadError) {
+    return false;
+  }
+
+  return options.isLatestUserMessageMissingResponse;
+}
 
 export function getLastUserMessageRetryPolicy(messages: Message[]): ChatRetryPolicy {
   const retryMessageIndex = messages.findLastIndex(
@@ -72,7 +104,7 @@ export function getChatRetryControl(
     };
   }
 
-  if (options.isRetryableError === false) {
+  if (options.error !== undefined && !getIsChatThreadErrorRetryable(options.error)) {
     return {
       canRetry: false,
       blockedMessage: null,

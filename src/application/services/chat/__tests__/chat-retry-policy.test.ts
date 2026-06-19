@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import { ChatResponseError } from "@/application/services/chat/chat-response-error";
 import {
   getChatRetryControl,
+  getIsAssistantMessageRetryTarget,
   getIsChatThreadErrorRetryable,
   getIsLatestUserMessageWithoutResponse,
+  getIsUnansweredUserMessageRetryTarget,
   getLastUserMessageRetryPolicy,
 } from "@/application/services/chat/chat-retry-policy";
 
@@ -178,7 +180,7 @@ describe("채팅 재전송 정책", () => {
     expect(
       getChatRetryControl(getLastUserMessageRetryPolicy(messages), {
         isRetryTarget: true,
-        isRetryableError: getIsChatThreadErrorRetryable(error),
+        error,
       }),
     ).toEqual({
       canRetry: false,
@@ -203,7 +205,7 @@ describe("채팅 재전송 정책", () => {
     expect(
       getChatRetryControl(getLastUserMessageRetryPolicy(messages), {
         isRetryTarget: true,
-        isRetryableError: getIsChatThreadErrorRetryable(error),
+        error,
       }),
     ).toEqual({
       canRetry: true,
@@ -229,5 +231,88 @@ describe("채팅 재전송 정책", () => {
     ] satisfies Message[];
 
     expect(getIsLatestUserMessageWithoutResponse(messages, "user-1")).toBe(false);
+  });
+
+  it("최신 assistant 메시지만 재시도 대상으로 판단한다", () => {
+    const messages = [
+      { id: "user-1", role: "user", content: "처음 질문" },
+      { id: "assistant-1", role: "assistant", content: "처음 답변" },
+      { id: "user-2", role: "user", content: "두 번째 질문" },
+      { id: "assistant-2", role: "assistant", content: "두 번째 답변" },
+    ] satisfies Message[];
+
+    expect(
+      getIsAssistantMessageRetryTarget({
+        assistantMessageId: "assistant-1",
+        hasThreadError: false,
+        isRunning: false,
+        messages,
+      }),
+    ).toBe(false);
+    expect(
+      getIsAssistantMessageRetryTarget({
+        assistantMessageId: "assistant-2",
+        hasThreadError: false,
+        isRunning: false,
+        messages,
+      }),
+    ).toBe(true);
+  });
+
+  it("응답 중이거나 thread error가 있으면 assistant 메시지를 재시도 대상으로 보지 않는다", () => {
+    const messages = [
+      { id: "user", role: "user", content: "질문" },
+      { id: "assistant", role: "assistant", content: "답변" },
+    ] satisfies Message[];
+    const baseOptions = {
+      assistantMessageId: "assistant",
+      messages,
+    };
+
+    expect(
+      getIsAssistantMessageRetryTarget({
+        ...baseOptions,
+        hasThreadError: false,
+        isRunning: true,
+      }),
+    ).toBe(false);
+    expect(
+      getIsAssistantMessageRetryTarget({
+        ...baseOptions,
+        hasThreadError: true,
+        isRunning: false,
+      }),
+    ).toBe(false);
+  });
+
+  it("응답이 없는 최신 사용자 메시지는 running/thread error가 없을 때만 재시도 대상으로 판단한다", () => {
+    expect(
+      getIsUnansweredUserMessageRetryTarget({
+        hasThreadError: false,
+        isLatestUserMessageMissingResponse: true,
+        isRunning: false,
+      }),
+    ).toBe(true);
+    expect(
+      getIsUnansweredUserMessageRetryTarget({
+        hasThreadError: true,
+        isLatestUserMessageMissingResponse: true,
+        isRunning: false,
+      }),
+    ).toBe(false);
+    expect(
+      getIsUnansweredUserMessageRetryTarget({
+        hasThreadError: false,
+        isLatestUserMessageMissingResponse: true,
+        isRunning: true,
+      }),
+    ).toBe(false);
+    expect(
+      getIsUnansweredUserMessageRetryTarget({
+        hasThreadError: false,
+        isLatestUserMessageMissingResponse: false,
+        isRunning: false,
+      }),
+    ).toBe(false);
   });
 });

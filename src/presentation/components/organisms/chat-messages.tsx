@@ -4,6 +4,7 @@ import { MessageProvider, useThread } from "@openuidev/react-headless";
 import { Shell } from "@openuidev/react-ui";
 import { useChatRetry } from "@/application/hooks/chat/use-chat-retry";
 import { useLatestUserResponse } from "@/application/hooks/chat/use-latest-user-response";
+import { getIsUnansweredUserMessageRetryTarget } from "@/application/services/chat/chat-retry-policy";
 import { AssistantResponseNotice } from "@/presentation/components/molecules/assistant-response-notice";
 import { ChatThreadError } from "@/presentation/components/molecules/chat-thread-error";
 import { GenUIAssistantMessage } from "@/presentation/components/organisms/genui-assistant-message/genui-assistant-message";
@@ -14,7 +15,11 @@ export function ChatMessages() {
   const isRunning = useThread((state) => state.isRunning);
   const threadError = useThread((state) => state.threadError);
   const latestUserResponse = useLatestUserResponse();
-  const shouldShowUnansweredResponse = !isRunning && !threadError && latestUserResponse.isMissing;
+  const shouldShowUnansweredResponse = getIsUnansweredUserMessageRetryTarget({
+    hasThreadError: Boolean(threadError),
+    isLatestUserMessageMissingResponse: latestUserResponse.isMissing,
+    isRunning,
+  });
   const { retryControl: threadErrorRetryControl, handleRetry: handleThreadErrorRetry } =
     useChatRetry({
       isRetryTarget: Boolean(threadError),
