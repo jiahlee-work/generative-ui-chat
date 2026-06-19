@@ -39,6 +39,10 @@ export function ImageComposerInputRow(props: ImageComposerInputRowProps) {
     textareaRef,
   } = props;
 
+  const handleTextChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    onChangeText(event.target.value);
+  };
+
   return (
     <div
       className={cn(
@@ -76,7 +80,7 @@ export function ImageComposerInputRow(props: ImageComposerInputRowProps) {
           hasMultilineInput && "col-span-full row-start-1",
         )}
         disabled={isDisabled}
-        onChange={(event) => onChangeText(event.target.value)}
+        onChange={handleTextChange}
         onKeyDown={onKeyDown}
         onPaste={onPaste}
         placeholder="메시지를 입력하세요..."

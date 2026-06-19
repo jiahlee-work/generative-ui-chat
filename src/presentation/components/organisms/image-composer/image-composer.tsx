@@ -49,6 +49,18 @@ export function ImageComposer(props: ImageComposerProps) {
     attachmentErrorMessage,
   );
 
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = "auto";
+    setHasMultilineInput(getHasMultilineInput(textarea));
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
+  });
+
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -68,18 +80,6 @@ export function ImageComposer(props: ImageComposerProps) {
       textareaRef.current?.focus();
     }
   };
-
-  useLayoutEffect(() => {
-    const textarea = textareaRef.current;
-
-    if (!textarea) {
-      return;
-    }
-
-    textarea.style.height = "auto";
-    setHasMultilineInput(getHasMultilineInput(textarea));
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
-  });
 
   return (
     <form className="flex flex-col gap-2 px-4 pt-3 pb-4 max-sm:p-2.5" onSubmit={handleFormSubmit}>

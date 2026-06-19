@@ -9,6 +9,7 @@ export function useLatestUserResponse() {
   const latestUserMessageId = useMemo(() => {
     return messages.findLast((message) => message.role === "user")?.id ?? null;
   }, [messages]);
+
   const isMissing = useMemo(() => {
     if (!latestUserMessageId) {
       return false;

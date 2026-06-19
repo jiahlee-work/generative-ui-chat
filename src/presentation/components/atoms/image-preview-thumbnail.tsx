@@ -26,29 +26,21 @@ export function ImagePreviewThumbnail(props: ImagePreviewThumbnailProps) {
   const previewItems = items && items.length > 0 ? items : [{ alt, src }];
   const currentItem = previewItems[currentIndex] ?? previewItems[0];
 
-  const getAdjacentIndex = (direction: "next" | "previous") => {
-    if (previewItems.length <= 0) {
-      return 0;
-    }
-
-    if (direction === "previous") {
-      return (currentIndex - 1 + previewItems.length) % previewItems.length;
-    }
-
-    return (currentIndex + 1) % previewItems.length;
-  };
-
   const openPreview = () => {
     setCurrentIndex(initialIndex);
     setIsPreviewOpen(true);
   };
 
+  const closePreview = () => {
+    setIsPreviewOpen(false);
+  };
+
   const showPreviousImage = () => {
-    setCurrentIndex(getAdjacentIndex("previous"));
+    setCurrentIndex((current) => getAdjacentPreviewIndex(current, previewItems.length, "previous"));
   };
 
   const showNextImage = () => {
-    setCurrentIndex(getAdjacentIndex("next"));
+    setCurrentIndex((current) => getAdjacentPreviewIndex(current, previewItems.length, "next"));
   };
 
   return (
@@ -78,7 +70,7 @@ export function ImagePreviewThumbnail(props: ImagePreviewThumbnailProps) {
             currentIndex={currentIndex}
             currentItem={currentItem}
             itemCount={previewItems.length}
-            onClose={() => setIsPreviewOpen(false)}
+            onClose={closePreview}
             onShowNextImage={showNextImage}
             onShowPreviousImage={showPreviousImage}
           />,
@@ -86,4 +78,20 @@ export function ImagePreviewThumbnail(props: ImagePreviewThumbnailProps) {
         )}
     </>
   );
+}
+
+function getAdjacentPreviewIndex(
+  currentIndex: number,
+  itemCount: number,
+  direction: "next" | "previous",
+) {
+  if (itemCount <= 0) {
+    return 0;
+  }
+
+  if (direction === "previous") {
+    return (currentIndex - 1 + itemCount) % itemCount;
+  }
+
+  return (currentIndex + 1) % itemCount;
 }

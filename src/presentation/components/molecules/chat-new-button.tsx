@@ -3,6 +3,7 @@
 import { useThreadList } from "@openuidev/react-headless";
 import { Button, IconButton, Shell, useLayoutContext } from "@openuidev/react-ui";
 import { SquarePen } from "lucide-react";
+import type { MouseEvent } from "react";
 
 export function ChatNewButton() {
   const switchToNewThread = useThreadList((state) => state.switchToNewThread);
@@ -14,16 +15,18 @@ export function ChatNewButton() {
     : isSidebarOpen;
   const isMobile = layout === "mobile";
 
+  const handleCollapsedNewThreadClick = (event: MouseEvent) => {
+    event.stopPropagation();
+    switchToNewThread();
+  };
+
   if (!showExpandedButton) {
     return (
       <IconButton
         aria-label="새 채팅"
         className="openui-shell-new-chat-button_collapsed"
         icon={<SquarePen size="1em" />}
-        onClick={(event) => {
-          event.stopPropagation();
-          switchToNewThread();
-        }}
+        onClick={handleCollapsedNewThreadClick}
         size={isMobile ? "medium" : "small"}
         title="새 채팅"
         variant="secondary"

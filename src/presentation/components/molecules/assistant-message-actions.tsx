@@ -1,7 +1,7 @@
 "use client";
 
-import {Check, Copy, RotateCcw} from "lucide-react";
-import {useCallback, useEffect, useRef, useState} from "react";
+import { Check, Copy, RotateCcw } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type AssistantMessageActionsProps = {
   onCopy?: () => boolean | Promise<boolean>;
@@ -12,9 +12,8 @@ type AssistantMessageActionsProps = {
 export function AssistantMessageActions(props: AssistantMessageActionsProps) {
   const { onCopy, onRetry, retryBlockedMessage } = props;
 
-  const [hasCopied, setHasCopied] = useState(false);
   const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
+  const [hasCopied, setHasCopied] = useState(false);
   const hasAction = Boolean(onCopy || onRetry || retryBlockedMessage);
 
   const handleCopy = useCallback(async () => {

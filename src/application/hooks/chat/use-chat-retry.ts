@@ -1,7 +1,7 @@
 "use client";
 
-import { useThread } from "@openuidev/react-headless";
-import { useCallback, useMemo } from "react";
+import {useThread} from "@openuidev/react-headless";
+import {useCallback, useMemo} from "react";
 import {
   getChatRetryControl,
   getIsChatThreadErrorRetryable,
@@ -18,7 +18,11 @@ export function useChatRetry(props: UseChatRetryProps = {}) {
   const messages = useThread((state) => state.messages);
   const processMessage = useThread((state) => state.processMessage);
   const setMessages = useThread((state) => state.setMessages);
-  const retryPolicy = useMemo(() => getLastUserMessageRetryPolicy(messages), [messages]);
+
+  const retryPolicy = useMemo(() => {
+    return getLastUserMessageRetryPolicy(messages);
+  }, [messages]);
+
   const retryControl = getChatRetryControl(retryPolicy, {
     isRetryTarget,
     isRetryableError: error === undefined ? undefined : getIsChatThreadErrorRetryable(error),

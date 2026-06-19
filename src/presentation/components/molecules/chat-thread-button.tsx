@@ -20,23 +20,31 @@ export function ChatThreadButton(props: ChatThreadButtonProps) {
     setIsSidebarOpen: state.setIsSidebarOpen,
   }));
   const { layout } = useLayoutContext();
+  const isMobile = layout === "mobile";
+  const isSelected = selectedThreadId === id;
+
+  const handleSelectThread = () => {
+    if (isMobile) {
+      setIsSidebarOpen(!isSidebarOpen);
+    }
+
+    selectThread(id);
+  };
+
+  const handleDeleteThread = () => {
+    deleteThread(id);
+  };
 
   return (
     <div
       className={cn(
         "openui-shell-thread-button",
-        selectedThreadId === id && "openui-shell-thread-button--selected",
+        isSelected && "openui-shell-thread-button--selected",
       )}
     >
       <button
         className="openui-shell-thread-button-title"
-        onClick={() => {
-          if (layout === "mobile") {
-            setIsSidebarOpen(!isSidebarOpen);
-          }
-
-          selectThread(id);
-        }}
+        onClick={handleSelectThread}
         type="button"
       >
         {title}
@@ -45,8 +53,8 @@ export function ChatThreadButton(props: ChatThreadButtonProps) {
         aria-label={`${title} 삭제`}
         className="openui-shell-thread-button-dropdown-trigger"
         icon={<Trash2 size="1em" />}
-        onClick={() => deleteThread(id)}
-        size={layout === "mobile" ? "small" : "extra-small"}
+        onClick={handleDeleteThread}
+        size={isMobile ? "small" : "extra-small"}
         title="채팅 삭제"
         variant="tertiary"
       />

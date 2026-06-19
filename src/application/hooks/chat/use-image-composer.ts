@@ -40,6 +40,14 @@ export function useImageComposer(props: UseImageComposerProps) {
   const canSubmit = !isDisabled && (hasTextContent || hasAttachments);
   const canSelectImages = !isDisabled && attachments.length < maxImageCount;
 
+  useEffect(() => {
+    if (!selectedThreadId || isRunning) {
+      return;
+    }
+
+    void saveLocalThreadMessages(selectedThreadId, messages).catch(reportThreadSaveError);
+  }, [isRunning, messages, selectedThreadId]);
+
   const addImageFiles = async (imageFiles: File[]) => {
     if (imageFiles.length === 0) {
       return;
@@ -116,14 +124,6 @@ export function useImageComposer(props: UseImageComposerProps) {
     }
   };
 
-  useEffect(() => {
-    if (!selectedThreadId || isRunning) {
-      return;
-    }
-
-    void saveLocalThreadMessages(selectedThreadId, messages).catch(() => undefined);
-  }, [isRunning, messages, selectedThreadId]);
-
   return {
     textContent,
     attachments,
@@ -159,4 +159,22 @@ function getLatestAssistantMessage(messages: Message[]) {
   }
 
   return latestAssistantMessage;
+}
+
+function reportThreadSaveError(error: unknown) {
+  const saveError = new Error("Failed to save local thread messages.", {
+    cause: error,
+  });
+
+  if (typeof reportError === "function") {
+    reportError(saveError);
+    return;
+  }
+
+  window.dispatchEvent(
+    new ErrorEvent("error", {
+      error: saveError,
+      message: saveError.message,
+    }),
+  );
 }

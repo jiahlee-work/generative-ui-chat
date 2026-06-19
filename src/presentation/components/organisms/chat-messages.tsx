@@ -6,7 +6,7 @@ import { useChatRetry } from "@/application/hooks/chat/use-chat-retry";
 import { useLatestUserResponse } from "@/application/hooks/chat/use-latest-user-response";
 import { AssistantResponseNotice } from "@/presentation/components/molecules/assistant-response-notice";
 import { ChatThreadError } from "@/presentation/components/molecules/chat-thread-error";
-import { GenUIAssistantMessage } from "@/presentation/components/organisms/genui-assistant-message";
+import { GenUIAssistantMessage } from "@/presentation/components/organisms/genui-assistant-message/genui-assistant-message";
 import { ImageUserMessage } from "@/presentation/components/organisms/image-user-message/image-user-message";
 
 export function ChatMessages() {

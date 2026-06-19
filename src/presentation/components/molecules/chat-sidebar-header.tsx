@@ -3,6 +3,7 @@
 import { IconButton, Shell } from "@openuidev/react-ui";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Image from "next/image";
+import type { MouseEvent } from "react";
 import { cn } from "@/shared/cn";
 
 export function ChatSidebarHeader() {
@@ -17,6 +18,11 @@ export function ChatSidebarHeader() {
   const showExpandedIcon =
     sidebarVisualState?.visualState === "expanded" ||
     sidebarVisualState?.visualState === "collapsing";
+
+  const handleSidebarToggleClick = (event: MouseEvent) => {
+    event.stopPropagation();
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   return (
     <div
@@ -39,10 +45,7 @@ export function ChatSidebarHeader() {
           aria-label={isSidebarOpen ? "사이드바 접기" : "사이드바 펼치기"}
           className="openui-shell-sidebar-header__toggle-button"
           icon={showExpandedIcon ? <PanelLeftClose size="1em" /> : <PanelLeftOpen size="1em" />}
-          onClick={(event) => {
-            event.stopPropagation();
-            setIsSidebarOpen(!isSidebarOpen);
-          }}
+          onClick={handleSidebarToggleClick}
           size="small"
           variant="tertiary"
         />
