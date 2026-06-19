@@ -5,6 +5,7 @@ import { BuiltinActionType, Renderer } from "@openuidev/react-lang";
 import { openuiLibrary, Shell } from "@openuidev/react-ui";
 import { useCallback, useMemo, useRef } from "react";
 import { normalizeAssistantCopyText } from "@/application/services/chat/assistant-copy-text";
+import { getAssistantResponseStatus } from "@/application/services/chat/assistant-response-status";
 import {
   getChatRetryBlockedMessage,
   getLastUserMessageRetryPolicy,
@@ -49,16 +50,11 @@ export function GenUIAssistantMessage(props: GenUIAssistantMessageProps) {
     () => getIsStreamingAssistantMessage(messages, isRunning, message.id),
     [isRunning, message.id, messages],
   );
-  const {
-    content: openuiCode,
-    contextString,
-    responseStatus,
-  } = useMemo(() => {
+  const { content: openuiCode, contextString } = useMemo(() => {
     if (!message.content) {
       return {
         content: null,
         contextString: null,
-        responseStatus: null,
       };
     }
 
@@ -76,6 +72,7 @@ export function GenUIAssistantMessage(props: GenUIAssistantMessageProps) {
   const retryPolicy = useMemo(() => getLastUserMessageRetryPolicy(messages), [messages]);
   const retryBlockedMessage =
     retryPolicy.status === "blocked" ? getChatRetryBlockedMessage(retryPolicy.reason) : null;
+  const responseStatus = getAssistantResponseStatus(message);
   const canRetryAssistantResponse = !isRunning && !threadError && isLatestAssistantResponse;
   const canRetryLatestAssistantResponse =
     canRetryAssistantResponse && retryPolicy.status === "allowed";

@@ -30,11 +30,16 @@ export type StoredBinaryContentPart = {
 
 export type StoredInputContentPart = StoredTextContentPart | StoredBinaryContentPart;
 
+export type StoredMessageMetadata = {
+  responseStatus?: "interrupted";
+};
+
 export type StoredMessageRecord = {
   id: string;
   threadId: string;
   role: string;
   content?: string | StoredInputContentPart[];
+  metadata?: StoredMessageMetadata;
   toolCallId?: string;
   toolCalls?: unknown;
   createdAt: number;

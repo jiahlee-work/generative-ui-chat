@@ -5,11 +5,14 @@ import {
   type ChangeEvent,
   type ClipboardEvent,
   type KeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
+  type SyntheticEvent,
   useEffect,
   useLayoutEffect,
   useReducer,
   useRef,
 } from "react";
+import { setAssistantResponseStatus } from "@/application/services/chat/assistant-response-status";
 import { saveLocalThreadMessages } from "@/application/services/chat/chat-history";
 import { createImageInputContent } from "@/application/services/chat/image-composer-content";
 import {
@@ -17,7 +20,6 @@ import {
   maxImageCount,
   readSelectedImageAttachments,
 } from "@/application/services/chat/image-composer-selection";
-import { markOpenUIResponseInterrupted } from "@/application/services/chat/openui-content";
 import { ImageComposerAttachments } from "@/presentation/components/molecules/image-composer-attachments";
 import { ImageComposerInputRow } from "@/presentation/components/molecules/image-composer-input-row";
 import { ImageComposerStatus } from "@/presentation/components/molecules/image-composer-status";
@@ -43,14 +45,8 @@ export function ImageComposer(props: ImageComposerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [composerState, dispatch] = useReducer(imageComposerReducer, initialImageComposerState);
-  const {
-    textContent,
-    attachments,
-    attachmentStatus,
-    attachmentErrorMessage,
-    chatNotice,
-    hasMultilineInput,
-  } = composerState;
+  const { textContent, attachments, attachmentStatus, attachmentErrorMessage, hasMultilineInput } =
+    composerState;
   const hasTextContent = textContent.trim().length > 0;
   const hasAttachments = attachments.length > 0;
   const isDisabled = isRunning || isLoadingMessages;
@@ -147,19 +143,27 @@ export function ImageComposer(props: ImageComposerProps) {
     onCancel();
 
     if (latestAssistantMessage) {
-      updateMessage({
-        ...latestAssistantMessage,
-        content: markOpenUIResponseInterrupted(latestAssistantMessage.content ?? ""),
-      });
+      updateMessage(setAssistantResponseStatus(latestAssistantMessage, "interrupted"));
     }
-
-    dispatch({ type: "cancelled" });
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       handleSubmit();
+    }
+  };
+
+  const handleFormSubmit = (event: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
+    event.preventDefault();
+    handleSubmit();
+  };
+
+  const handleComposerBoxClick = (event: ReactMouseEvent<HTMLDivElement>) => {
+    const target = event.target;
+
+    if (target instanceof HTMLElement && !target.closest("button, a, [role='button']")) {
+      textareaRef.current?.focus();
     }
   };
 
@@ -187,21 +191,10 @@ export function ImageComposer(props: ImageComposerProps) {
   });
 
   return (
-    <form
-      className="flex flex-col gap-2 px-4 pt-3 pb-4 max-sm:p-2.5"
-      onSubmit={(event) => {
-        event.preventDefault();
-        handleSubmit();
-      }}
-    >
+    <form className="flex flex-col gap-2 px-4 pt-3 pb-4 max-sm:p-2.5" onSubmit={handleFormSubmit}>
       <div
         className="flex flex-col gap-2 rounded-[14px] border border-current/15 bg-[color-mix(in_srgb,var(--background)_92%,currentColor_4%)] p-2.5"
-        onClick={(event) => {
-          const target = event.target;
-          if (target instanceof HTMLElement && !target.closest("button, a, [role='button']")) {
-            textareaRef.current?.focus();
-          }
-        }}
+        onClick={handleComposerBoxClick}
       >
         {hasAttachments && (
           <ImageComposerAttachments
@@ -227,12 +220,9 @@ export function ImageComposer(props: ImageComposerProps) {
           textareaRef={textareaRef}
         />
       </div>
-
       <ImageComposerStatus
         attachmentStatus={attachmentStatus}
         attachmentStatusMessage={attachmentStatusMessage}
-        chatNotice={chatNotice}
-        isRunning={isRunning}
       />
     </form>
   );

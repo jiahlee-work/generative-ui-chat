@@ -1,10 +1,15 @@
 import type {
   BinaryInputContent,
+  AssistantMessage,
   InputContent,
   Message,
   Thread,
   UserMessage,
 } from "@openuidev/react-headless";
+import {
+  type AssistantMessageWithMetadata,
+  getStoredAssistantResponseMetadata,
+} from "@/application/services/chat/assistant-response-status";
 import { createBlobObjectUrl, revokeBlobObjectUrls } from "@/infrastructure/browser/image-files";
 import {
   deleteStoredThread,
@@ -170,6 +175,14 @@ async function toStoredMessage(
     storedMessage.toolCalls = message.toolCalls;
   }
 
+  if (message.role === "assistant") {
+    const metadata = getStoredAssistantResponseMetadata(message as AssistantMessage);
+
+    if (metadata) {
+      storedMessage.metadata = metadata;
+    }
+  }
+
   return {
     storedMessage,
     attachments,
@@ -265,12 +278,17 @@ async function fromStoredMessage(message: StoredMessageRecord): Promise<Message>
   }
 
   if (message.role === "assistant") {
-    return {
+    const metadata = message.metadata;
+    const assistantMessage: AssistantMessage = {
       id: message.id,
       role: "assistant",
       content: message.content,
       toolCalls: Array.isArray(message.toolCalls) ? message.toolCalls : undefined,
     };
+
+    return metadata
+      ? ({ ...assistantMessage, metadata } as AssistantMessageWithMetadata)
+      : assistantMessage;
   }
 
   if (message.role === "tool") {

@@ -1,15 +1,11 @@
 import type { BrowserImageAttachment } from "@/infrastructure/browser/image-files";
-import type {
-  AttachmentStatus,
-  ChatNotice,
-} from "@/presentation/features/chat/lib/composer/image-composer-status";
+import type { AttachmentStatus } from "@/presentation/features/chat/lib/composer/image-composer-status";
 
 export type ImageComposerState = {
   textContent: string;
   attachments: BrowserImageAttachment[];
   attachmentStatus: AttachmentStatus;
   attachmentErrorMessage: string | null;
-  chatNotice: ChatNotice;
   hasMultilineInput: boolean;
 };
 
@@ -38,9 +34,6 @@ export type ImageComposerAction =
       type: "submitted";
     }
   | {
-      type: "cancelled";
-    }
-  | {
       type: "inputLayoutChanged";
       hasMultilineInput: boolean;
     };
@@ -50,7 +43,6 @@ export const initialImageComposerState: ImageComposerState = {
   attachments: [],
   attachmentStatus: "idle",
   attachmentErrorMessage: null,
-  chatNotice: null,
   hasMultilineInput: false,
 };
 
@@ -105,13 +97,6 @@ export function imageComposerReducer(
 
   if (action.type === "submitted") {
     return initialImageComposerState;
-  }
-
-  if (action.type === "cancelled") {
-    return {
-      ...state,
-      chatNotice: "cancelled",
-    };
   }
 
   if (action.type === "inputLayoutChanged") {

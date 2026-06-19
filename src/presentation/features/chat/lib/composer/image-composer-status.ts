@@ -1,5 +1,4 @@
 export type AttachmentStatus = "idle" | "uploading" | "ready" | "failed";
-export type ChatNotice = "cancelled" | null;
 
 export function getAttachmentStatusMessage(
   status: AttachmentStatus,
