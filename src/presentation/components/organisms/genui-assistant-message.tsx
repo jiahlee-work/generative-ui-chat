@@ -4,12 +4,9 @@ import { type AssistantMessage, useThread } from "@openuidev/react-headless";
 import { BuiltinActionType, Renderer } from "@openuidev/react-lang";
 import { openuiLibrary, Shell } from "@openuidev/react-ui";
 import { useCallback, useMemo, useRef } from "react";
+import { useChatRetry } from "@/application/hooks/chat/use-chat-retry";
 import { normalizeAssistantCopyText } from "@/application/services/chat/assistant-copy-text";
 import { getAssistantResponseStatus } from "@/application/services/chat/assistant-response-status";
-import {
-  getChatRetryBlockedMessage,
-  getLastUserMessageRetryPolicy,
-} from "@/application/services/chat/chat-retry-policy";
 import {
   getFollowingToolMessages,
   getInitialRendererState,
@@ -40,7 +37,6 @@ export function GenUIAssistantMessage(props: GenUIAssistantMessageProps) {
   const messages = useThread((state) => state.messages);
   const isRunning = useThread((state) => state.isRunning);
   const processMessage = useThread((state) => state.processMessage);
-  const setMessages = useThread((state) => state.setMessages);
   const threadError = useThread((state) => state.threadError);
   const updateMessage = useThread((state) => state.updateMessage);
 
@@ -69,13 +65,11 @@ export function GenUIAssistantMessage(props: GenUIAssistantMessageProps) {
     () => getIsLatestAssistantResponseMessage(messages, message.id),
     [message.id, messages],
   );
-  const retryPolicy = useMemo(() => getLastUserMessageRetryPolicy(messages), [messages]);
-  const retryBlockedMessage =
-    retryPolicy.status === "blocked" ? getChatRetryBlockedMessage(retryPolicy.reason) : null;
   const responseStatus = getAssistantResponseStatus(message);
   const canRetryAssistantResponse = !isRunning && !threadError && isLatestAssistantResponse;
-  const canRetryLatestAssistantResponse =
-    canRetryAssistantResponse && retryPolicy.status === "allowed";
+  const { retryControl, handleRetry } = useChatRetry({
+    isRetryTarget: canRetryAssistantResponse,
+  });
   const shouldShowInterruptedNotice = responseStatus === "interrupted";
 
   const handleStateUpdate = useCallback(
@@ -121,15 +115,6 @@ export function GenUIAssistantMessage(props: GenUIAssistantMessageProps) {
     [processMessage],
   );
 
-  const handleRetry = useCallback(() => {
-    if (retryPolicy.status !== "allowed") {
-      return;
-    }
-
-    setMessages(retryPolicy.messagesBeforeRetry);
-    void processMessage(retryPolicy.retryMessage);
-  }, [processMessage, retryPolicy, setMessages]);
-
   const handleCopy = useCallback(async () => {
     if (typeof navigator === "undefined") {
       return false;
@@ -166,30 +151,16 @@ export function GenUIAssistantMessage(props: GenUIAssistantMessageProps) {
         <div className="mt-3">
           <AssistantResponseNotice
             message="응답 생성이 중단되었습니다."
-            onRetry={canRetryLatestAssistantResponse ? handleRetry : undefined}
-            retryBlockedMessage={
-              canRetryAssistantResponse && retryPolicy.status === "blocked"
-                ? retryBlockedMessage
-                : null
-            }
+            onRetry={retryControl.canRetry ? handleRetry : undefined}
+            retryBlockedMessage={retryControl.blockedMessage}
           />
         </div>
       )}
       {!isRunning && (
         <AssistantMessageActions
           onCopy={openuiCode ? handleCopy : undefined}
-          onRetry={
-            !shouldShowInterruptedNotice && canRetryLatestAssistantResponse
-              ? handleRetry
-              : undefined
-          }
-          retryBlockedMessage={
-            !shouldShowInterruptedNotice &&
-            canRetryAssistantResponse &&
-            retryPolicy.status === "blocked"
-              ? retryBlockedMessage
-              : null
-          }
+          onRetry={!shouldShowInterruptedNotice && retryControl.canRetry ? handleRetry : undefined}
+          retryBlockedMessage={!shouldShowInterruptedNotice ? retryControl.blockedMessage : null}
         />
       )}
     </Shell.AssistantMessageContainer>

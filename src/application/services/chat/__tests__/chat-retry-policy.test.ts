@@ -1,7 +1,9 @@
 import type { Message } from "@openuidev/react-headless";
 import { describe, expect, it } from "vitest";
+import { ChatResponseError } from "@/application/services/chat/chat-response-error";
 import {
-  getChatRetryBlockedMessage,
+  getChatRetryControl,
+  getIsChatThreadErrorRetryable,
   getIsLatestUserMessageWithoutResponse,
   getLastUserMessageRetryPolicy,
 } from "@/application/services/chat/chat-retry-policy";
@@ -89,9 +91,14 @@ describe("채팅 재전송 정책", () => {
       status: "blocked",
       reason: "imageRequiresReattach",
     });
-    expect(getChatRetryBlockedMessage("imageRequiresReattach")).toBe(
-      "이미지는 다시 첨부해야 합니다.",
-    );
+    expect(
+      getChatRetryControl(getLastUserMessageRetryPolicy(messages), {
+        isRetryTarget: true,
+      }),
+    ).toEqual({
+      canRetry: false,
+      blockedMessage: "이미지는 다시 첨부해야 합니다.",
+    });
   });
 
   it("깨진 이미지 안내가 포함된 메시지는 다시 첨부하도록 막는다", () => {
@@ -125,7 +132,83 @@ describe("채팅 재전송 정책", () => {
       status: "blocked",
       reason: "noUserMessage",
     });
-    expect(getChatRetryBlockedMessage("noUserMessage")).toBeNull();
+    expect(
+      getChatRetryControl(getLastUserMessageRetryPolicy(messages), {
+        isRetryTarget: true,
+      }),
+    ).toEqual({
+      canRetry: false,
+      blockedMessage: null,
+    });
+  });
+
+  it("재시도 대상이 아니면 재시도 버튼과 차단 문구를 숨긴다", () => {
+    const messages = [
+      {
+        id: "user",
+        role: "user",
+        content: "질문",
+      },
+    ] satisfies Message[];
+
+    expect(
+      getChatRetryControl(getLastUserMessageRetryPolicy(messages), {
+        isRetryTarget: false,
+      }),
+    ).toEqual({
+      canRetry: false,
+      blockedMessage: null,
+    });
+  });
+
+  it("재시도 불가능한 API 에러는 재시도 버튼과 차단 문구를 숨긴다", () => {
+    const error = new ChatResponseError({
+      message: "채팅 요청이 올바르지 않습니다.",
+      retryable: false,
+    });
+    const messages = [
+      {
+        id: "user",
+        role: "user",
+        content: "질문",
+      },
+    ] satisfies Message[];
+
+    expect(getIsChatThreadErrorRetryable(error)).toBe(false);
+    expect(
+      getChatRetryControl(getLastUserMessageRetryPolicy(messages), {
+        isRetryTarget: true,
+        isRetryableError: getIsChatThreadErrorRetryable(error),
+      }),
+    ).toEqual({
+      canRetry: false,
+      blockedMessage: null,
+    });
+  });
+
+  it("재시도 가능한 에러는 마지막 사용자 메시지 재전송을 허용한다", () => {
+    const error = new ChatResponseError({
+      message: "응답을 생성하지 못했습니다. 재시도해 주세요.",
+      retryable: true,
+    });
+    const messages = [
+      {
+        id: "user",
+        role: "user",
+        content: "질문",
+      },
+    ] satisfies Message[];
+
+    expect(getIsChatThreadErrorRetryable(error)).toBe(true);
+    expect(
+      getChatRetryControl(getLastUserMessageRetryPolicy(messages), {
+        isRetryTarget: true,
+        isRetryableError: getIsChatThreadErrorRetryable(error),
+      }),
+    ).toEqual({
+      canRetry: true,
+      blockedMessage: null,
+    });
   });
 
   it("최신 사용자 메시지 뒤에 응답이 없으면 미응답 메시지로 판단한다", () => {

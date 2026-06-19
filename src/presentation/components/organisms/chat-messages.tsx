@@ -2,13 +2,8 @@
 
 import { MessageProvider, useThread } from "@openuidev/react-headless";
 import { Shell } from "@openuidev/react-ui";
-import { useCallback, useMemo } from "react";
-import { isChatResponseError } from "@/application/services/chat/chat-response-error";
-import {
-  getChatRetryBlockedMessage,
-  getIsLatestUserMessageWithoutResponse,
-  getLastUserMessageRetryPolicy,
-} from "@/application/services/chat/chat-retry-policy";
+import { useChatRetry } from "@/application/hooks/chat/use-chat-retry";
+import { useLatestUserResponse } from "@/application/hooks/chat/use-latest-user-response";
 import { AssistantResponseNotice } from "@/presentation/components/molecules/assistant-response-notice";
 import { ChatThreadError } from "@/presentation/components/molecules/chat-thread-error";
 import { GenUIAssistantMessage } from "@/presentation/components/organisms/genui-assistant-message";
@@ -17,43 +12,19 @@ import { ImageUserMessage } from "@/presentation/components/organisms/image-user
 export function ChatMessages() {
   const messages = useThread((state) => state.messages);
   const isRunning = useThread((state) => state.isRunning);
-  const processMessage = useThread((state) => state.processMessage);
-  const setMessages = useThread((state) => state.setMessages);
   const threadError = useThread((state) => state.threadError);
-
-  const retryPolicy = useMemo(() => getLastUserMessageRetryPolicy(messages), [messages]);
-  const latestUserMessageId = useMemo(() => {
-    return messages.findLast((message) => message.role === "user")?.id ?? null;
-  }, [messages]);
-  const hasLatestUserMessageWithoutResponse = useMemo(() => {
-    if (!latestUserMessageId) {
-      return false;
-    }
-
-    return getIsLatestUserMessageWithoutResponse(messages, latestUserMessageId);
-  }, [latestUserMessageId, messages]);
-  const canRetryThreadError = Boolean(
-    threadError && (!isChatResponseError(threadError) || threadError.retryable),
+  const latestUserResponse = useLatestUserResponse();
+  const shouldShowUnansweredResponse = !isRunning && !threadError && latestUserResponse.isMissing;
+  const { retryControl: threadErrorRetryControl, handleRetry: handleThreadErrorRetry } =
+    useChatRetry({
+      isRetryTarget: Boolean(threadError),
+      error: threadError,
+    });
+  const { retryControl: unansweredRetryControl, handleRetry: handleUnansweredRetry } = useChatRetry(
+    {
+      isRetryTarget: shouldShowUnansweredResponse,
+    },
   );
-  const retryBlockedMessage =
-    canRetryThreadError && retryPolicy.status === "blocked"
-      ? getChatRetryBlockedMessage(retryPolicy.reason)
-      : null;
-  const shouldShowUnansweredResponse =
-    !isRunning && !threadError && hasLatestUserMessageWithoutResponse;
-  const unansweredRetryBlockedMessage =
-    shouldShowUnansweredResponse && retryPolicy.status === "blocked"
-      ? getChatRetryBlockedMessage(retryPolicy.reason)
-      : null;
-
-  const handleRetry = useCallback(() => {
-    if (retryPolicy.status !== "allowed") {
-      return;
-    }
-
-    setMessages(retryPolicy.messagesBeforeRetry);
-    void processMessage(retryPolicy.retryMessage);
-  }, [processMessage, retryPolicy, setMessages]);
 
   return (
     <div className="openui-shell-thread-messages">
@@ -73,18 +44,16 @@ export function ChatMessages() {
         <Shell.AssistantMessageContainer>
           <AssistantResponseNotice
             message="응답이 생성되지 않았습니다."
-            onRetry={retryPolicy.status === "allowed" ? handleRetry : undefined}
-            retryBlockedMessage={unansweredRetryBlockedMessage}
+            onRetry={unansweredRetryControl.canRetry ? handleUnansweredRetry : undefined}
+            retryBlockedMessage={unansweredRetryControl.blockedMessage}
           />
         </Shell.AssistantMessageContainer>
       )}
       {!isRunning && threadError && (
         <ChatThreadError
           message={threadError.message}
-          onRetry={
-            canRetryThreadError && retryPolicy.status === "allowed" ? handleRetry : undefined
-          }
-          retryBlockedMessage={retryBlockedMessage}
+          onRetry={threadErrorRetryControl.canRetry ? handleThreadErrorRetry : undefined}
+          retryBlockedMessage={threadErrorRetryControl.blockedMessage}
         />
       )}
     </div>

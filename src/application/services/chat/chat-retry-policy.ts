@@ -5,6 +5,7 @@ import type {
   Message,
   UserMessage,
 } from "@openuidev/react-headless";
+import { isChatResponseError } from "@/application/services/chat/chat-response-error";
 
 export type ChatRetryBlockReason = "noUserMessage" | "imageRequiresReattach";
 
@@ -18,6 +19,16 @@ export type ChatRetryPolicy =
       status: "blocked";
       reason: ChatRetryBlockReason;
     };
+
+export type ChatRetryControl = {
+  canRetry: boolean;
+  blockedMessage: string | null;
+};
+
+type ChatRetryControlOptions = {
+  isRetryTarget: boolean;
+  isRetryableError?: boolean;
+};
 
 export function getLastUserMessageRetryPolicy(messages: Message[]): ChatRetryPolicy {
   const retryMessageIndex = messages.findLastIndex(
@@ -48,6 +59,49 @@ export function getLastUserMessageRetryPolicy(messages: Message[]): ChatRetryPol
     },
     messagesBeforeRetry: messages.slice(0, retryMessageIndex),
   };
+}
+
+export function getChatRetryControl(
+  policy: ChatRetryPolicy,
+  options: ChatRetryControlOptions,
+): ChatRetryControl {
+  if (!options.isRetryTarget) {
+    return {
+      canRetry: false,
+      blockedMessage: null,
+    };
+  }
+
+  if (options.isRetryableError === false) {
+    return {
+      canRetry: false,
+      blockedMessage: null,
+    };
+  }
+
+  if (policy.status === "allowed") {
+    return {
+      canRetry: true,
+      blockedMessage: null,
+    };
+  }
+
+  return {
+    canRetry: false,
+    blockedMessage: getChatRetryBlockedMessage(policy.reason),
+  };
+}
+
+export function getIsChatThreadErrorRetryable(error: unknown) {
+  if (!error) {
+    return false;
+  }
+
+  if (!isChatResponseError(error)) {
+    return true;
+  }
+
+  return error.retryable;
 }
 
 export function getIsLatestUserMessageWithoutResponse(messages: Message[], messageId: string) {
