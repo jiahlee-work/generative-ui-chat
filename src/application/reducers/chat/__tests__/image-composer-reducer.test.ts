@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { BrowserImageAttachment } from "@/infrastructure/browser/image-files";
 import {
   imageComposerReducer,
   initialImageComposerState,
-} from "@/presentation/features/chat/lib/composer/image-composer-state";
+} from "@/application/reducers/chat/image-composer-reducer";
+import type { BrowserImageAttachment } from "@/infrastructure/browser/image-files";
 
 const attachment: BrowserImageAttachment = {
   id: "attachment-1",

@@ -1,6 +1,7 @@
 "use client";
 
 import type { UserMessage } from "@openuidev/react-headless";
+import { getOpenUIDisplayText } from "@/application/services/chat/openui-content";
 import {
   type ImagePreviewItem,
   ImagePreviewThumbnail,
@@ -8,8 +9,7 @@ import {
 import {
   getImagePartKey,
   getImagePartSource,
-} from "@/presentation/features/chat/lib/image/image-message-content";
-import { getDisplayText } from "@/presentation/features/chat/lib/message/display-text";
+} from "@/presentation/components/organisms/image-user-message/utils/image-message-content";
 
 type ImageUserMessageProps = {
   message: UserMessage;
@@ -30,7 +30,7 @@ export function ImageUserMessage(props: ImageUserMessageProps) {
     };
   });
   const messageText = hasTextOnlyContent
-    ? getDisplayText(content)
+    ? getOpenUIDisplayText(content)
     : textParts.map((part) => part.text).join("\n");
 
   if (hasTextOnlyContent) {

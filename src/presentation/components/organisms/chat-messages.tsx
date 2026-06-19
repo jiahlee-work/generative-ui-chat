@@ -3,16 +3,16 @@
 import { MessageProvider, useThread } from "@openuidev/react-headless";
 import { Shell } from "@openuidev/react-ui";
 import { useCallback, useMemo } from "react";
+import { isChatResponseError } from "@/application/services/chat/chat-response-error";
 import {
   getChatRetryBlockedMessage,
   getIsLatestUserMessageWithoutResponse,
   getLastUserMessageRetryPolicy,
 } from "@/application/services/chat/chat-retry-policy";
-import { isChatResponseError } from "@/application/services/chat/chat-response-error";
 import { AssistantResponseNotice } from "@/presentation/components/molecules/assistant-response-notice";
 import { ChatThreadError } from "@/presentation/components/molecules/chat-thread-error";
 import { GenUIAssistantMessage } from "@/presentation/components/organisms/genui-assistant-message";
-import { ImageUserMessage } from "@/presentation/components/organisms/image-user-message";
+import { ImageUserMessage } from "@/presentation/components/organisms/image-user-message/image-user-message";
 
 export function ChatMessages() {
   const messages = useThread((state) => state.messages);
@@ -81,7 +81,9 @@ export function ChatMessages() {
       {!isRunning && threadError && (
         <ChatThreadError
           message={threadError.message}
-          onRetry={canRetryThreadError && retryPolicy.status === "allowed" ? handleRetry : undefined}
+          onRetry={
+            canRetryThreadError && retryPolicy.status === "allowed" ? handleRetry : undefined
+          }
           retryBlockedMessage={retryBlockedMessage}
         />
       )}

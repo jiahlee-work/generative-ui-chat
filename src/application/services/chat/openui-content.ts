@@ -30,3 +30,7 @@ export function wrapOpenUIContent(text: string) {
 export function wrapOpenUIContext(json: string) {
   return `<context>${json}</context>`;
 }
+
+export function getOpenUIDisplayText(raw: string) {
+  return separateOpenUIContent(raw).content.trim();
+}

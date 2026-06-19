@@ -1,7 +1,7 @@
 "use client";
 
 import { useThread } from "@openuidev/react-headless";
-import { ImageComposer } from "@/presentation/components/organisms/image-composer";
+import { ImageComposer } from "@/presentation/components/organisms/image-composer/image-composer";
 
 export function ChatComposer() {
   const cancelMessage = useThread((state) => state.cancelMessage);

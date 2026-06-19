@@ -3,7 +3,7 @@
 import { Shell } from "@openuidev/react-ui";
 import { ChatNewButton } from "@/presentation/components/molecules/chat-new-button";
 import { ChatSidebarHeader } from "@/presentation/components/molecules/chat-sidebar-header";
-import { ChatThreadList } from "@/presentation/components/organisms/chat-thread-list";
+import { ChatThreadList } from "@/presentation/components/organisms/chat-thread-list/chat-thread-list";
 
 export function ChatSidebar() {
   return (

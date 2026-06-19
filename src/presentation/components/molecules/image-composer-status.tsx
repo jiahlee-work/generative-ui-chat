@@ -1,6 +1,6 @@
 "use client";
 
-import type { AttachmentStatus } from "@/presentation/features/chat/lib/composer/image-composer-status";
+import type { AttachmentStatus } from "@/application/reducers/chat/image-composer-reducer";
 import { cn } from "@/shared/cn";
 
 type ImageComposerStatusProps = {

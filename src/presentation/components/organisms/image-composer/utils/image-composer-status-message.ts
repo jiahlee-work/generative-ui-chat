@@ -1,4 +1,4 @@
-export type AttachmentStatus = "idle" | "uploading" | "ready" | "failed";
+import type { AttachmentStatus } from "@/application/reducers/chat/image-composer-reducer";
 
 export function getAttachmentStatusMessage(
   status: AttachmentStatus,

@@ -1,14 +1,5 @@
 import type { Thread } from "@openuidev/react-headless";
 
-export const threadGroupLabels = {
-  today: "오늘",
-  yesterday: "어제",
-  last7Days: "최근 7일",
-  last30Days: "최근 30일",
-  thisYear: "올해",
-  older: "이전",
-};
-
 export const threadGroupOrder = [
   "today",
   "yesterday",
@@ -18,7 +9,13 @@ export const threadGroupOrder = [
   "older",
 ] as const satisfies ThreadGroupKey[];
 
-export type ThreadGroupKey = keyof typeof threadGroupLabels;
+export type ThreadGroupKey =
+  | "today"
+  | "yesterday"
+  | "last7Days"
+  | "last30Days"
+  | "thisYear"
+  | "older";
 export type ThreadGroups = Record<ThreadGroupKey, Thread[]>;
 
 export function groupThreadsByCreatedAt(threads: Thread[], now = new Date()): ThreadGroups {

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getImagePartKey,
   getImagePartSource,
-} from "@/presentation/features/chat/lib/image/image-message-content";
+} from "@/presentation/components/organisms/image-user-message/utils/image-message-content";
 
 describe("이미지 메시지 콘텐츠 도우미", () => {
   it("이미지 조각 URL이 있으면 이미지 출처로 사용한다", () => {

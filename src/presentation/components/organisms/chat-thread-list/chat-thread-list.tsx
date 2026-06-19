@@ -2,12 +2,12 @@
 
 import { useThreadList } from "@openuidev/react-headless";
 import { useEffect } from "react";
-import { ChatThreadButton } from "@/presentation/components/molecules/chat-thread-button";
 import {
   groupThreadsByCreatedAt,
-  threadGroupLabels,
   threadGroupOrder,
-} from "@/presentation/features/chat/lib/sidebar/thread-groups";
+} from "@/application/selectors/chat/thread-groups";
+import { ChatThreadButton } from "@/presentation/components/molecules/chat-thread-button";
+import { threadGroupLabels } from "@/presentation/components/organisms/chat-thread-list/utils/thread-group-labels";
 
 export function ChatThreadList() {
   const threads = useThreadList((state) => state.threads);
