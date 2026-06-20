@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  getImageMessageContentParts,
   getImagePartKey,
   getImagePartSource,
 } from "@/presentation/components/organisms/image-user-message/utils/image-message-content";
@@ -55,5 +56,61 @@ describe("이미지 메시지 콘텐츠 도우미", () => {
         data: "abc",
       }),
     ).toBe("image/jpeg:image.jpg:abc");
+  });
+
+  it("깨진 이미지 안내 텍스트를 일반 텍스트와 분리한다", () => {
+    expect(
+      getImageMessageContentParts([
+        { type: "text", text: "이미지 설명" },
+        { type: "text", text: "[이미지를 불러올 수 없습니다: missing.png]" },
+      ]),
+    ).toEqual({
+      imageParts: [],
+      mediaParts: [
+        {
+          part: {
+            filename: "missing.png",
+            key: "unavailable-image:1:missing.png",
+          },
+          type: "unavailableImage",
+        },
+      ],
+      textParts: [{ type: "text", text: "이미지 설명" }],
+      unavailableImageParts: [
+        {
+          filename: "missing.png",
+          key: "unavailable-image:1:missing.png",
+        },
+      ],
+    });
+  });
+
+  it("정상 이미지와 깨진 이미지의 표시 순서를 유지한다", () => {
+    const imagePart = {
+      type: "binary",
+      mimeType: "image/png",
+      filename: "image.png",
+      url: "blob:http://localhost/image",
+    } as const;
+
+    expect(
+      getImageMessageContentParts([
+        { type: "text", text: "[이미지를 불러올 수 없습니다: missing.png]" },
+        imagePart,
+      ]).mediaParts,
+    ).toEqual([
+      {
+        part: {
+          filename: "missing.png",
+          key: "unavailable-image:0:missing.png",
+        },
+        type: "unavailableImage",
+      },
+      {
+        imageIndex: 0,
+        part: imagePart,
+        type: "image",
+      },
+    ]);
   });
 });

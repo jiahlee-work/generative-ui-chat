@@ -7,6 +7,7 @@ import type {
 } from "@openuidev/react-headless";
 import { isChatResponseError } from "@/application/services/chat/chat-response-error";
 import { getIsLatestAssistantResponseMessage } from "@/application/services/chat/genui-assistant-message";
+import { getUnavailableImageFilename } from "@/application/services/chat/unavailable-image";
 
 export type ChatRetryBlockReason = "noUserMessage" | "imageRequiresReattach";
 
@@ -183,5 +184,5 @@ function hasDirectImageData(part: BinaryInputContent) {
 }
 
 function isUnavailableImageText(part: InputContent) {
-  return part.type === "text" && part.text.startsWith("[이미지를 불러올 수 없습니다:");
+  return part.type === "text" && getUnavailableImageFilename(part.text) !== null;
 }

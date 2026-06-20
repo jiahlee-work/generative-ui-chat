@@ -2,12 +2,11 @@
 
 import type { UserMessage } from "@openuidev/react-headless";
 import { getOpenUIDisplayText } from "@/application/services/chat/openui-content";
+import type { ImagePreviewItem } from "@/presentation/components/atoms/image-preview-thumbnail";
+import { ImageMessageMediaPreview } from "@/presentation/components/organisms/image-message-media-preview/image-message-media-preview";
+import { getImageMessageMediaPartKey } from "@/presentation/components/organisms/image-message-media-preview/utils/image-message-media-part-key";
 import {
-  type ImagePreviewItem,
-  ImagePreviewThumbnail,
-} from "@/presentation/components/atoms/image-preview-thumbnail";
-import {
-  getImagePartKey,
+  getImageMessageContentParts,
   getImagePartSource,
 } from "@/presentation/components/organisms/image-user-message/utils/image-message-content";
 
@@ -19,9 +18,10 @@ export function ImageUserMessage(props: ImageUserMessageProps) {
   const { message } = props;
   const { content } = message;
   const hasTextOnlyContent = typeof content === "string";
-  const textParts = hasTextOnlyContent ? [] : content.filter((part) => part.type === "text");
-  const imageParts = hasTextOnlyContent ? [] : content.filter((part) => part.type === "binary");
-  const hasImageParts = imageParts.length > 0;
+  const { imageParts, mediaParts, textParts } = hasTextOnlyContent
+    ? { imageParts: [], mediaParts: [], textParts: [] }
+    : getImageMessageContentParts(content);
+  const hasImageParts = mediaParts.length > 0;
   const hasTextParts = textParts.length > 0;
   const previewItems: ImagePreviewItem[] = imageParts.map((part) => {
     return {
@@ -46,14 +46,11 @@ export function ImageUserMessage(props: ImageUserMessageProps) {
       <div className="flex flex-col items-end gap-2">
         {hasImageParts && (
           <div className="flex max-w-[min(420px,100%)] flex-wrap justify-end gap-2">
-            {imageParts.map((part, index) => (
-              <ImagePreviewThumbnail
-                alt={part.filename ?? ""}
-                className="aspect-square w-[132px] max-w-full rounded-lg max-sm:w-[104px]"
-                initialIndex={index}
-                items={previewItems}
-                key={getImagePartKey(part)}
-                src={previewItems[index]?.src ?? getImagePartSource(part)}
+            {mediaParts.map((part) => (
+              <ImageMessageMediaPreview
+                key={getImageMessageMediaPartKey(part)}
+                part={part}
+                previewItems={previewItems}
               />
             ))}
           </div>

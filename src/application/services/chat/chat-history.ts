@@ -10,6 +10,7 @@ import {
   type AssistantMessageWithMetadata,
   getStoredAssistantResponseMetadata,
 } from "@/application/services/chat/assistant-response-status";
+import { createUnavailableImageText } from "@/application/services/chat/unavailable-image";
 import { createBlobObjectUrl, revokeBlobObjectUrls } from "@/infrastructure/browser/image-files";
 import {
   deleteStoredThread,
@@ -320,11 +321,12 @@ async function fromStoredInputContent(content: StoredInputContentPart[]) {
     }
 
     const attachment = await getStoredAttachment(part.attachmentId).catch(() => undefined);
+    const objectUrl = attachment ? createRestoredImageObjectUrl(attachment.blob) : null;
 
-    if (!attachment) {
+    if (!objectUrl) {
       restoredParts.push({
         type: "text",
-        text: getUnavailableImageText(part.filename),
+        text: createUnavailableImageText(part.filename),
       });
       continue;
     }
@@ -333,7 +335,7 @@ async function fromStoredInputContent(content: StoredInputContentPart[]) {
       type: "binary",
       mimeType: part.mimeType,
       filename: part.filename,
-      url: createBlobObjectUrl(attachment.blob),
+      url: objectUrl,
       attachmentId: part.attachmentId,
     } as StoredBinaryInputContent);
   }
@@ -360,8 +362,12 @@ function prepareInputContentForRequest(content: InputContent[], isLatestUserMess
   });
 }
 
-function getUnavailableImageText(filename?: string) {
-  return `[이미지를 불러올 수 없습니다: ${filename ?? "첨부 파일"}]`;
+function createRestoredImageObjectUrl(blob: Blob) {
+  try {
+    return createBlobObjectUrl(blob);
+  } catch {
+    return null;
+  }
 }
 
 function findLatestUserMessageId(messages: Message[]) {
