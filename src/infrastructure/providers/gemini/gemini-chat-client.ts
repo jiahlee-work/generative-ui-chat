@@ -4,7 +4,7 @@ import type { ChatCompletionMessageParam } from "openai/resources/chat/completio
 import { join } from "path";
 
 const geminiBaseUrl = "https://generativelanguage.googleapis.com/v1beta/openai/";
-const systemPrompt = readFileSync(join(process.cwd(), "src/generated/system-prompt.txt"), "utf-8");
+const systemPromptPath = join(process.cwd(), "src/generated/system-prompt.txt");
 
 export class MissingGeminiApiKeyError extends Error {
   constructor() {
@@ -26,11 +26,15 @@ export async function createGeminiChatStream(messages: ChatCompletionMessagePara
   });
   const response = await client.chat.completions.create({
     model: process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
-    messages: [{ role: "system", content: systemPrompt }, ...messages],
+    messages: [{ role: "system", content: readSystemPrompt() }, ...messages],
     stream: true,
   });
 
   return response.toReadableStream();
+}
+
+function readSystemPrompt() {
+  return readFileSync(systemPromptPath, "utf-8");
 }
 
 export function getGeminiProviderStatus(error: unknown) {

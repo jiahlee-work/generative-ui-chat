@@ -16,32 +16,53 @@ const ImageBlockPropsSchema = z.object({
   src: z.string(),
 });
 
-const CopyableImage = defineComponent({
-  name: "Image",
-  props: ImagePropsSchema,
-  description: "Image with alt text and optional URL",
-  component: ({ props }) => <CopyableOpenUIImage alt={props.alt} src={props.src ?? ""} />,
-});
+type CreateOpenUIAssistantMessageLibraryParams = {
+  showIndividualImageCopyButton: boolean;
+};
 
-const CopyableImageBlock = defineComponent({
-  name: "ImageBlock",
-  props: ImageBlockPropsSchema,
-  description: "Image block with loading state",
-  component: ({ props }) => <CopyableOpenUIImageBlock alt={props.alt} src={props.src} />,
-});
+export function createOpenUIAssistantMessageLibrary(
+  params: CreateOpenUIAssistantMessageLibraryParams,
+) {
+  const { showIndividualImageCopyButton } = params;
+  const CopyableImage = defineComponent({
+    name: "Image",
+    props: ImagePropsSchema,
+    description: "Image with alt text and optional URL",
+    component: ({ props }) => (
+      <CopyableOpenUIImage
+        alt={props.alt}
+        showCopyButton={showIndividualImageCopyButton}
+        src={props.src ?? ""}
+      />
+    ),
+  });
 
-export const openuiAssistantMessageLibrary = createLibrary({
-  root: openuiLibrary.root,
-  componentGroups: openuiLibrary.componentGroups,
-  components: Object.values(openuiLibrary.components).map((component) => {
-    if (component.name === "Image") {
-      return CopyableImage;
-    }
+  const CopyableImageBlock = defineComponent({
+    name: "ImageBlock",
+    props: ImageBlockPropsSchema,
+    description: "Image block with loading state",
+    component: ({ props }) => (
+      <CopyableOpenUIImageBlock
+        alt={props.alt}
+        showCopyButton={showIndividualImageCopyButton}
+        src={props.src}
+      />
+    ),
+  });
 
-    if (component.name === "ImageBlock") {
-      return CopyableImageBlock;
-    }
+  return createLibrary({
+    root: openuiLibrary.root,
+    componentGroups: openuiLibrary.componentGroups,
+    components: Object.values(openuiLibrary.components).map((component) => {
+      if (component.name === "Image") {
+        return CopyableImage;
+      }
 
-    return component;
-  }),
-});
+      if (component.name === "ImageBlock") {
+        return CopyableImageBlock;
+      }
+
+      return component;
+    }),
+  });
+}

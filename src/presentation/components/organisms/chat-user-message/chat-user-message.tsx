@@ -39,12 +39,13 @@ export function ChatUserMessage(props: ChatUserMessageProps) {
   if (hasTextOnlyContent) {
     return (
       <div className="openui-shell-thread-message-user">
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col items-end gap-1">
           <div className="openui-shell-thread-message-user__content">{messageText}</div>
           <ChatMessageActions
             align="end"
             copyLabel="사용자 메시지"
             onCopy={copyText ? handleCopy : undefined}
+            spacing="compact"
           />
         </div>
       </div>
@@ -53,7 +54,7 @@ export function ChatUserMessage(props: ChatUserMessageProps) {
 
   return (
     <div className="openui-shell-thread-message-user">
-      <div className="flex flex-col items-end gap-2">
+      <div className="flex flex-col items-end gap-1">
         {hasImageParts && (
           <div className="flex max-w-[min(420px,100%)] flex-wrap justify-end gap-2">
             {mediaParts.map((part) => (
@@ -72,6 +73,7 @@ export function ChatUserMessage(props: ChatUserMessageProps) {
           align="end"
           copyLabel="사용자 메시지"
           onCopy={copyText ? handleCopy : undefined}
+          spacing="compact"
         />
       </div>
     </div>

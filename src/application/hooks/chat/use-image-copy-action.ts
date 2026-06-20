@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CopyActionState } from "@/application/hooks/chat/copy-action-state";
+import { getCanRenderImageSource } from "@/application/services/chat/image-source";
 import { writeBrowserClipboardPayload } from "@/infrastructure/browser/clipboard";
 import { fetchImageAsPngBlob } from "@/infrastructure/browser/image-blob";
 
@@ -22,14 +23,13 @@ export function useImageCopyAction(src: string) {
   }, []);
 
   const handleCopy = useCallback(async () => {
-    if (!src || isCopying) {
+    if (!getCanRenderImageSource(src) || isCopying) {
       return;
     }
 
     setCopyState("copying");
 
-    const imageBlob = await fetchImageAsPngBlob(src);
-    const didCopy = imageBlob ? await writeBrowserClipboardPayload({ imageBlob }) : false;
+    const didCopy = await copyImageToClipboard(src);
 
     if (!didCopy) {
       setCopyState("failed");
@@ -54,4 +54,18 @@ export function useImageCopyAction(src: string) {
     handleCopy,
     isCopying,
   };
+}
+
+async function copyImageToClipboard(src: string) {
+  try {
+    const imageBlob = await fetchImageAsPngBlob(src);
+
+    if (!imageBlob) {
+      return false;
+    }
+
+    return writeBrowserClipboardPayload({ imageBlob });
+  } catch {
+    return false;
+  }
 }

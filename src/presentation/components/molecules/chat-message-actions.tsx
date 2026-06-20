@@ -7,6 +7,7 @@ import { CopyStatusIcon } from "@/presentation/components/atoms/copy-status-icon
 import { cn } from "@/shared/cn";
 
 type MessageActionsAlign = "start" | "end";
+type MessageActionsSpacing = "default" | "compact";
 
 type ChatMessageActionsProps = {
   align?: MessageActionsAlign;
@@ -15,6 +16,7 @@ type ChatMessageActionsProps = {
   onCopy?: () => boolean | Promise<boolean>;
   onRetry?: () => void;
   retryBlockedMessage?: string | null;
+  spacing?: MessageActionsSpacing;
 };
 
 function getCopyButtonLabel(copyLabel: string, copyState: CopyActionState) {
@@ -53,6 +55,7 @@ export function ChatMessageActions(props: ChatMessageActionsProps) {
     onCopy,
     onRetry,
     retryBlockedMessage,
+    spacing = "default",
   } = props;
   const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [copyState, setCopyState] = useState<CopyActionState>("idle");
@@ -61,11 +64,12 @@ export function ChatMessageActions(props: ChatMessageActionsProps) {
   const hasCopyFailed = copyState === "failed";
   const copyButtonLabel = getCopyButtonLabel(copyLabel, copyState);
   const copyButtonTitle = getCopyButtonTitle(copyLabel, copyState);
+  const spacingClassName = spacing === "default" ? "mt-2" : "";
   const containerClassName = cn(
-    "mt-2 flex flex-wrap items-center gap-2 text-current/70",
+    "flex flex-wrap items-center gap-2 text-current/70",
     align === "end" && "justify-end",
   );
-  const wrapperClassName = cn("mt-2", align === "end" && "text-right");
+  const wrapperClassName = cn(spacingClassName, align === "end" && "text-right");
 
   const resetCopyStateLater = useCallback((delay: number) => {
     if (copyResetTimeoutRef.current) {
@@ -85,7 +89,7 @@ export function ChatMessageActions(props: ChatMessageActionsProps) {
 
     setCopyState("copying");
 
-    const didCopy = await onCopy();
+    const didCopy = await Promise.resolve(onCopy()).catch(() => false);
 
     if (!didCopy) {
       setCopyState("failed");

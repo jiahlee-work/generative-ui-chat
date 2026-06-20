@@ -27,13 +27,17 @@ export function useAssistantCopyAction() {
       return false;
     }
 
-    const imageBlob = await fetchImageAsPngBlob(imageSource);
+    try {
+      const imageBlob = await fetchImageAsPngBlob(imageSource);
 
-    if (!imageBlob) {
+      if (!imageBlob) {
+        return false;
+      }
+
+      return writeBrowserClipboardPayload({ imageBlob });
+    } catch {
       return false;
     }
-
-    return writeBrowserClipboardPayload({ imageBlob });
   }, []);
 
   return {
