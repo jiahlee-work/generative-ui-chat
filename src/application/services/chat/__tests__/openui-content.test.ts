@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  getHasIncompleteDataImageSource,
   getOpenUIDisplayText,
   separateOpenUIContent,
   wrapOpenUIContent,
@@ -30,5 +31,31 @@ describe("OpenUI 콘텐츠 도우미", () => {
     expect(
       getOpenUIDisplayText('<content>사용자 입력</content>\n<context>{"value":1}</context>'),
     ).toBe("사용자 입력");
+  });
+
+  it("스트리밍 중 닫히지 않은 이미지 data URL을 감지한다", () => {
+    expect(
+      getHasIncompleteDataImageSource(
+        'Image(src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovLw',
+      ),
+    ).toBe(true);
+  });
+
+  it("명백히 깨진 base64 이미지 data URL을 감지한다", () => {
+    expect(getHasIncompleteDataImageSource('Image(src="data:image/svg+xml;base64,abcde")')).toBe(
+      true,
+    );
+  });
+
+  it("완성된 이미지 data URL은 허용한다", () => {
+    expect(
+      getHasIncompleteDataImageSource('Image(src="data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=")'),
+    ).toBe(false);
+  });
+
+  it("일반 이미지 URL은 data URL 검사 대상에서 제외한다", () => {
+    expect(getHasIncompleteDataImageSource('Image(src="https://example.com/preview.png")')).toBe(
+      false,
+    );
   });
 });

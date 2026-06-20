@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
-import type { MouseEvent } from "react";
+import { type MouseEvent, useEffect } from "react";
 
 export type ImagePreviewItem = {
   alt: string;
@@ -23,7 +23,16 @@ export function ImagePreviewDialog(props: ImagePreviewDialogProps) {
     props;
   const canNavigate = itemCount > 1;
 
-  const handlePreviewContentClick = (event: MouseEvent) => {
+  const handleClose = () => {
+    onClose();
+  };
+
+  const handleCloseButtonClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    onClose();
+  };
+
+  const handlePreviewContentClick = (event: MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
   };
 
@@ -37,17 +46,31 @@ export function ImagePreviewDialog(props: ImagePreviewDialogProps) {
     onShowNextImage();
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
   return (
     <div
       aria-modal="true"
       className="fixed inset-0 z-image-preview-dialog flex items-center justify-center bg-black/70 p-6"
-      onClick={onClose}
+      onClick={handleClose}
       role="dialog"
     >
       <button
         aria-label="이미지 미리보기 닫기"
-        className="fixed top-5 right-5 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-0 bg-black/70 text-white"
-        onClick={onClose}
+        className="fixed top-5 right-5 z-10 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-0 bg-black/70 text-white"
+        onClick={handleCloseButtonClick}
         type="button"
       >
         <X size={20} />
@@ -55,7 +78,7 @@ export function ImagePreviewDialog(props: ImagePreviewDialogProps) {
       {canNavigate && (
         <button
           aria-label="이전 이미지 보기"
-          className="fixed left-5 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-black/70 text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="fixed left-5 z-10 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-black/70 text-white disabled:cursor-not-allowed disabled:opacity-40"
           onClick={handleShowPreviousImage}
           type="button"
         >
@@ -63,7 +86,7 @@ export function ImagePreviewDialog(props: ImagePreviewDialogProps) {
         </button>
       )}
       <div
-        className="relative h-[min(calc(100vh-48px),760px)] w-[min(100%,1040px)]"
+        className="relative z-0 h-[min(calc(100vh-48px),760px)] w-[min(100%,1040px)]"
         onClick={handlePreviewContentClick}
       >
         <Image
@@ -77,12 +100,12 @@ export function ImagePreviewDialog(props: ImagePreviewDialogProps) {
       </div>
       {canNavigate && (
         <>
-          <div className="fixed bottom-6 rounded-full bg-black/70 px-3 py-1 text-sm text-white">
+          <div className="fixed bottom-6 z-10 rounded-full bg-black/70 px-3 py-1 text-sm text-white">
             {currentIndex + 1} / {itemCount}
           </div>
           <button
             aria-label="다음 이미지 보기"
-            className="fixed right-5 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-black/70 text-white disabled:cursor-not-allowed disabled:opacity-40"
+            className="fixed right-5 z-10 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-black/70 text-white disabled:cursor-not-allowed disabled:opacity-40"
             onClick={handleShowNextImage}
             type="button"
           >

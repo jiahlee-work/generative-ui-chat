@@ -1,11 +1,12 @@
 "use client";
 
-import { Check, Copy, Loader2, RotateCcw, TriangleAlert } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { CopyActionState } from "@/application/hooks/chat/copy-action-state";
+import { CopyStatusIcon } from "@/presentation/components/atoms/copy-status-icon";
 import { cn } from "@/shared/cn";
 
 type MessageActionsAlign = "start" | "end";
-type CopyState = "idle" | "copying" | "copied" | "failed";
 
 type ChatMessageActionsProps = {
   align?: MessageActionsAlign;
@@ -16,7 +17,7 @@ type ChatMessageActionsProps = {
   retryBlockedMessage?: string | null;
 };
 
-function getCopyButtonLabel(copyLabel: string, copyState: CopyState) {
+function getCopyButtonLabel(copyLabel: string, copyState: CopyActionState) {
   if (copyState === "copied") {
     return `${copyLabel} 복사 완료`;
   }
@@ -32,7 +33,7 @@ function getCopyButtonLabel(copyLabel: string, copyState: CopyState) {
   return `${copyLabel} 복사`;
 }
 
-function getCopyButtonTitle(copyLabel: string, copyState: CopyState) {
+function getCopyButtonTitle(copyLabel: string, copyState: CopyActionState) {
   if (copyState === "copied") {
     return "복사 완료";
   }
@@ -54,10 +55,9 @@ export function ChatMessageActions(props: ChatMessageActionsProps) {
     retryBlockedMessage,
   } = props;
   const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [copyState, setCopyState] = useState<CopyState>("idle");
+  const [copyState, setCopyState] = useState<CopyActionState>("idle");
   const hasAction = Boolean(onCopy || onRetry || retryBlockedMessage);
   const isCopying = copyState === "copying";
-  const hasCopied = copyState === "copied";
   const hasCopyFailed = copyState === "failed";
   const copyButtonLabel = getCopyButtonLabel(copyLabel, copyState);
   const copyButtonTitle = getCopyButtonTitle(copyLabel, copyState);
@@ -121,10 +121,7 @@ export function ChatMessageActions(props: ChatMessageActionsProps) {
             title={copyButtonTitle}
             type="button"
           >
-            {isCopying && <Loader2 className="animate-spin" size={16} />}
-            {hasCopied && <Check size={16} />}
-            {hasCopyFailed && <TriangleAlert size={16} />}
-            {copyState === "idle" && <Copy size={16} />}
+            <CopyStatusIcon copyState={copyState} />
           </button>
         )}
         {onRetry && (

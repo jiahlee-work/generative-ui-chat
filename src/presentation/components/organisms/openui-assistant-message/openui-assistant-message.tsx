@@ -2,14 +2,16 @@
 
 import type { AssistantMessage } from "@openuidev/react-headless";
 import { Renderer } from "@openuidev/react-lang";
-import { openuiLibrary, Shell } from "@openuidev/react-ui";
+import { Shell } from "@openuidev/react-ui";
 import { useAssistantCopyAction } from "@/application/hooks/chat/use-assistant-copy-action";
 import { useAssistantMessageState } from "@/application/hooks/chat/use-assistant-message-state";
 import { useAssistantRendererActions } from "@/application/hooks/chat/use-assistant-renderer-actions";
 import { useAssistantRendererContent } from "@/application/hooks/chat/use-assistant-renderer-content";
+import { getHasIncompleteDataImageSource } from "@/application/services/chat/openui-content";
 import { AssistantResponseNotice } from "@/presentation/components/molecules/assistant-response-notice";
 import { ChatMessageActions } from "@/presentation/components/molecules/chat-message-actions";
 import { OpenUIToolActivity } from "@/presentation/components/molecules/openui-tool-activity";
+import { openuiAssistantMessageLibrary } from "@/presentation/components/organisms/openui-assistant-message/openui-assistant-message-library";
 
 type OpenUIAssistantMessageProps = {
   message: AssistantMessage;
@@ -31,19 +33,22 @@ export function OpenUIAssistantMessage(props: OpenUIAssistantMessageProps) {
     shouldShowInterruptedNotice,
     toolMessages,
   } = useAssistantMessageState(message);
+  const shouldDeferRenderer = isStreaming && getHasIncompleteDataImageSource(openuiCode);
 
   return (
     <Shell.AssistantMessageContainer>
       <OpenUIToolActivity isStreaming={isStreaming} message={message} toolMessages={toolMessages} />
       <div ref={renderedResponseRef}>
-        <Renderer
-          initialState={initialState}
-          isStreaming={isStreaming}
-          library={openuiLibrary}
-          onAction={handleAction}
-          onStateUpdate={handleStateUpdate}
-          response={openuiCode}
-        />
+        {!shouldDeferRenderer && (
+          <Renderer
+            initialState={initialState}
+            isStreaming={isStreaming}
+            library={openuiAssistantMessageLibrary}
+            onAction={handleAction}
+            onStateUpdate={handleStateUpdate}
+            response={openuiCode}
+          />
+        )}
       </div>
       {shouldShowInterruptedNotice && (
         <div className="mt-3">

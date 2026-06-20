@@ -46,6 +46,7 @@ export default defineConfig({
             optimizer: {
               web: {
                 include: [
+                  "@openuidev/react-ui",
                   "@storybook/react-dom-shim",
                   "axe-core",
                   "clsx",
