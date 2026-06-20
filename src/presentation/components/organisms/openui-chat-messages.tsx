@@ -7,10 +7,10 @@ import { useLatestUserResponse } from "@/application/hooks/chat/use-latest-user-
 import { getIsUnansweredUserMessageRetryTarget } from "@/application/services/chat/chat-retry-policy";
 import { AssistantResponseNotice } from "@/presentation/components/molecules/assistant-response-notice";
 import { ChatThreadError } from "@/presentation/components/molecules/chat-thread-error";
-import { GenUIAssistantMessage } from "@/presentation/components/organisms/genui-assistant-message/genui-assistant-message";
-import { ImageUserMessage } from "@/presentation/components/organisms/image-user-message/image-user-message";
+import { ChatUserMessage } from "@/presentation/components/organisms/chat-user-message/chat-user-message";
+import { OpenUIAssistantMessage } from "@/presentation/components/organisms/openui-assistant-message/openui-assistant-message";
 
-export function ChatMessages() {
+export function OpenUIChatMessages() {
   const messages = useThread((state) => state.messages);
   const isRunning = useThread((state) => state.isRunning);
   const threadError = useThread((state) => state.threadError);
@@ -37,10 +37,10 @@ export function ChatMessages() {
         <MessageProvider key={message.id} message={message}>
           <Shell.RenderMessage
             allMessages={messages}
-            assistantMessage={GenUIAssistantMessage}
+            assistantMessage={OpenUIAssistantMessage}
             isStreaming={isRunning && index === messages.length - 1}
             message={message}
-            userMessage={ImageUserMessage}
+            userMessage={ChatUserMessage}
           />
         </MessageProvider>
       ))}

@@ -1,6 +1,7 @@
 import type { UserMessage } from "@openuidev/react-headless";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { ImageUserMessage } from "@/presentation/components/organisms/image-user-message/image-user-message";
+import { expect, within } from "storybook/test";
+import { ChatUserMessage } from "@/presentation/components/organisms/chat-user-message/chat-user-message";
 
 const previewDataUrl =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'><rect width='160' height='160' fill='%23f3f4f6'/><text x='80' y='86' text-anchor='middle' font-family='Arial' font-size='32' fill='%23111827'>1+1</text></svg>";
@@ -14,8 +15,8 @@ const createUserMessage = (content: UserMessage["content"]): UserMessage => {
 };
 
 const meta = {
-  title: "Chat/ImageUserMessage",
-  component: ImageUserMessage,
+  title: "Chat/ChatUserMessage",
+  component: ChatUserMessage,
   parameters: {
     layout: "centered",
   },
@@ -27,7 +28,7 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof ImageUserMessage>;
+} satisfies Meta<typeof ChatUserMessage>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -35,6 +36,11 @@ type Story = StoryObj<typeof meta>;
 export const TextOnly: Story = {
   args: {
     message: createUserMessage("이미지에 보이는 수식 계산"),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await expect(canvas.getByRole("button", { name: "사용자 메시지 복사" })).toBeInTheDocument();
   },
 };
 

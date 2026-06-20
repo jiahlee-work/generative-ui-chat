@@ -6,12 +6,12 @@ import {
   ImagePreviewThumbnail,
 } from "@/presentation/components/atoms/image-preview-thumbnail";
 import {
-  getImagePartSource,
-  type ImageMessageMediaPart,
-} from "@/presentation/components/organisms/image-user-message/utils/image-message-content";
+  type ChatUserMessageMediaPart,
+  getUserMessageImagePartSource,
+} from "@/presentation/components/organisms/chat-user-message/utils/chat-user-message-content";
 
 type ImageMessageMediaPreviewProps = {
-  part: ImageMessageMediaPart;
+  part: ChatUserMessageMediaPart;
   previewItems: ImagePreviewItem[];
 };
 
@@ -36,7 +36,7 @@ export function ImageMessageMediaPreview(props: ImageMessageMediaPreviewProps) {
       className="aspect-square w-[132px] max-w-full rounded-lg max-sm:w-[104px]"
       initialIndex={part.imageIndex}
       items={previewItems}
-      src={previewItems[part.imageIndex]?.src ?? getImagePartSource(part.part)}
+      src={previewItems[part.imageIndex]?.src ?? getUserMessageImagePartSource(part.part)}
     />
   );
 }

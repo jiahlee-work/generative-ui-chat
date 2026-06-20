@@ -1,7 +1,7 @@
 import type { BinaryInputContent, InputContent } from "@openuidev/react-headless";
 import { getUnavailableImageFilename } from "@/application/services/chat/unavailable-image";
 
-type ImageBinaryInputContent = BinaryInputContent & {
+type UserMessageBinaryInputContent = BinaryInputContent & {
   attachmentId?: string;
 };
 
@@ -10,10 +10,10 @@ export type UnavailableImagePart = {
   key: string;
 };
 
-export type ImageMessageMediaPart =
+export type ChatUserMessageMediaPart =
   | {
       imageIndex: number;
-      part: BinaryInputContent;
+      part: UserMessageBinaryInputContent;
       type: "image";
     }
   | {
@@ -21,9 +21,9 @@ export type ImageMessageMediaPart =
       type: "unavailableImage";
     };
 
-export function getImageMessageContentParts(content: InputContent[]) {
-  const imageParts: BinaryInputContent[] = [];
-  const mediaParts: ImageMessageMediaPart[] = [];
+export function getChatUserMessageContentParts(content: InputContent[]) {
+  const imageParts: UserMessageBinaryInputContent[] = [];
+  const mediaParts: ChatUserMessageMediaPart[] = [];
   const textParts: Extract<InputContent, { type: "text" }>[] = [];
   const unavailableImageParts: UnavailableImagePart[] = [];
 
@@ -63,7 +63,7 @@ export function getImageMessageContentParts(content: InputContent[]) {
   };
 }
 
-export function getImagePartSource(part: BinaryInputContent) {
+export function getUserMessageImagePartSource(part: BinaryInputContent) {
   if (part.url) {
     return part.url;
   }
@@ -71,7 +71,7 @@ export function getImagePartSource(part: BinaryInputContent) {
   return `data:${part.mimeType};base64,${part.data ?? ""}`;
 }
 
-export function getImagePartKey(part: ImageBinaryInputContent) {
+export function getUserMessageImagePartKey(part: UserMessageBinaryInputContent) {
   if (part.attachmentId) {
     return part.attachmentId;
   }

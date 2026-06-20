@@ -11,9 +11,9 @@ import {
 } from "@/application/services/chat/chat-history";
 import { processChatMessage } from "@/application/services/chat/process-chat-message";
 import { ChatComposer } from "@/presentation/components/organisms/chat-composer";
-import { ChatMessages } from "@/presentation/components/organisms/chat-messages";
 import { ChatMobileHeader } from "@/presentation/components/organisms/chat-mobile-header";
 import { ChatSidebar } from "@/presentation/components/organisms/chat-sidebar";
+import { OpenUIChatMessages } from "@/presentation/components/organisms/openui-chat-messages";
 
 export function ChatScreen() {
   return (
@@ -32,7 +32,7 @@ export function ChatScreen() {
           <Shell.ThreadContainer>
             <ChatMobileHeader />
             <Shell.ScrollArea scrollVariant="user-message-anchor">
-              <ChatMessages />
+              <OpenUIChatMessages />
             </Shell.ScrollArea>
             <ChatComposer />
           </Shell.ThreadContainer>

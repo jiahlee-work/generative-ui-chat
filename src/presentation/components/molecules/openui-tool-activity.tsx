@@ -3,13 +3,13 @@
 import type { AssistantMessage, ToolMessage } from "@openuidev/react-headless";
 import { BehindTheScenes, ToolCallComponent, ToolResult } from "@openuidev/react-ui";
 
-type GenUIToolActivityProps = {
+type OpenUIToolActivityProps = {
   isStreaming: boolean;
   message: AssistantMessage;
   toolMessages: ToolMessage[];
 };
 
-export function GenUIToolActivity(props: GenUIToolActivityProps) {
+export function OpenUIToolActivity(props: OpenUIToolActivityProps) {
   const { isStreaming, message, toolMessages } = props;
   const hasToolActivity = Boolean(message.toolCalls?.length) || toolMessages.length > 0;
 

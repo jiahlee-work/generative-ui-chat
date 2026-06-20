@@ -6,7 +6,7 @@ import type {
   UserMessage,
 } from "@openuidev/react-headless";
 import { isChatResponseError } from "@/application/services/chat/chat-response-error";
-import { getIsLatestAssistantResponseMessage } from "@/application/services/chat/genui-assistant-message";
+import { getIsLatestAssistantResponseMessage } from "@/application/services/chat/openui-assistant-message";
 import { getUnavailableImageFilename } from "@/application/services/chat/unavailable-image";
 
 export type ChatRetryBlockReason = "noUserMessage" | "imageRequiresReattach";

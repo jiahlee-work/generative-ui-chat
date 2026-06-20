@@ -5,9 +5,9 @@ import {
   getInitialRendererState,
   getIsLatestAssistantResponseMessage,
   getIsStreamingAssistantMessage,
-} from "@/application/services/chat/genui-assistant-message";
+} from "@/application/services/chat/openui-assistant-message";
 
-describe("GenUI 어시스턴트 메시지 도우미", () => {
+describe("OpenUI 어시스턴트 메시지 도우미", () => {
   it("어시스턴트 메시지가 현재 스트리밍 중인지 판별한다", () => {
     const messages: Message[] = [
       { id: "user-1", role: "user", content: "hi" },

@@ -2,7 +2,7 @@
 
 import type { AssistantMessage } from "@openuidev/react-headless";
 import { useMemo } from "react";
-import { getInitialRendererState } from "@/application/services/chat/genui-assistant-message";
+import { getInitialRendererState } from "@/application/services/chat/openui-assistant-message";
 import { separateOpenUIContent } from "@/application/services/chat/openui-content";
 
 export function useAssistantRendererContent(content: AssistantMessage["content"]) {

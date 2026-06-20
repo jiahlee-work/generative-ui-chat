@@ -7,7 +7,7 @@ import { getIsAssistantMessageRetryTarget } from "@/application/services/chat/ch
 import {
   getFollowingToolMessages,
   getIsStreamingAssistantMessage,
-} from "@/application/services/chat/genui-assistant-message";
+} from "@/application/services/chat/openui-assistant-message";
 
 export function useAssistantMessageState(message: AssistantMessage) {
   const messages = useThread((state) => state.messages);

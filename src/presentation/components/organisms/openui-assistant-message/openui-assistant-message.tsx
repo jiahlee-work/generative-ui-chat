@@ -7,15 +7,15 @@ import { useAssistantCopyAction } from "@/application/hooks/chat/use-assistant-c
 import { useAssistantMessageState } from "@/application/hooks/chat/use-assistant-message-state";
 import { useAssistantRendererActions } from "@/application/hooks/chat/use-assistant-renderer-actions";
 import { useAssistantRendererContent } from "@/application/hooks/chat/use-assistant-renderer-content";
-import { AssistantMessageActions } from "@/presentation/components/molecules/assistant-message-actions";
 import { AssistantResponseNotice } from "@/presentation/components/molecules/assistant-response-notice";
-import { GenUIToolActivity } from "@/presentation/components/molecules/genui-tool-activity";
+import { ChatMessageActions } from "@/presentation/components/molecules/chat-message-actions";
+import { OpenUIToolActivity } from "@/presentation/components/molecules/openui-tool-activity";
 
-type GenUIAssistantMessageProps = {
+type OpenUIAssistantMessageProps = {
   message: AssistantMessage;
 };
 
-export function GenUIAssistantMessage(props: GenUIAssistantMessageProps) {
+export function OpenUIAssistantMessage(props: OpenUIAssistantMessageProps) {
   const { message } = props;
   const { initialState, openuiCode } = useAssistantRendererContent(message.content);
   const { handleAction, handleStateUpdate } = useAssistantRendererActions({
@@ -34,7 +34,7 @@ export function GenUIAssistantMessage(props: GenUIAssistantMessageProps) {
 
   return (
     <Shell.AssistantMessageContainer>
-      <GenUIToolActivity isStreaming={isStreaming} message={message} toolMessages={toolMessages} />
+      <OpenUIToolActivity isStreaming={isStreaming} message={message} toolMessages={toolMessages} />
       <div ref={renderedResponseRef}>
         <Renderer
           initialState={initialState}
@@ -55,7 +55,7 @@ export function GenUIAssistantMessage(props: GenUIAssistantMessageProps) {
         </div>
       )}
       {!isRunning && (
-        <AssistantMessageActions
+        <ChatMessageActions
           onCopy={openuiCode ? handleCopy : undefined}
           onRetry={!shouldShowInterruptedNotice && retryControl.canRetry ? handleRetry : undefined}
           retryBlockedMessage={!shouldShowInterruptedNotice ? retryControl.blockedMessage : null}
